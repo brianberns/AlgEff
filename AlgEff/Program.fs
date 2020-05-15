@@ -6,17 +6,17 @@ module Program =
 
     let hypotenuse a b =
         effect {
-            do! logf "Side a: %A" a
-            do! logf "Side b: %A" b
+            do! logf "Side a: %g" a
+            do! logf "Side b: %g" b
             let c = sqrt <| (a*a + b*b)
-            do! Effect.logf "Side c: %A" c
+            do! logf "Side c: %g" c
             return c
         }
 
     let dump log =
         printfn ""
         printfn "Log contains %A entries:" (log |> List.length)
-        for msg in log |> List.rev do
+        for msg in log do
             printfn "   %s" msg
 
     let run a b =
@@ -24,7 +24,7 @@ module Program =
             hypotenuse a b
                 |> handle
         dump log
-        printfn "Final result: %A" c
+        printfn "Final result: %g" c
 
     [<EntryPoint>]
     let main argv =

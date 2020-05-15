@@ -20,7 +20,8 @@ module Effect =
                 loop log' (cont ())
             | Result result -> result, log
 
-        loop [] effect
+        let result, log = loop [] effect
+        result, log |> List.rev
 
     let log str = Log (str, fun () -> Result ())
 
