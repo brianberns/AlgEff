@@ -5,24 +5,24 @@ module Program =
     [<EntryPoint>]
     let main argv =
 
-        let logSqrt x =
-            log {
-                do! LogEffect.logf "x: %A" x
+        let mySqrt x =
+            effect {
+                do! Effect.logf "Input: %A" x
                 let result = sqrt x
-                do! LogEffect.logf "result: %A" result
+                do! Effect.logf "Result: %A" result
                 return result
             }
 
         let run x =
 
             let result, log =
-                logSqrt x
-                    |> LogEffect.pureHandler
+                mySqrt x
+                    |> Effect.handle
 
             printfn ""
-            printfn "Log: %A messages" log.Length
+            printfn "Log contains %A entries:" log.Length
             for msg in log |> List.rev do
-                printfn "%s" msg
+                printfn "   %s" msg
             printfn "Final result: %A" result
 
         run 2.0

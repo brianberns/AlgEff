@@ -49,7 +49,7 @@
     <None Include="App.config" />
     <Content Include="packages.config" />
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Log.fs" />
+    <Compile Include="Effect.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
