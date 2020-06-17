@@ -1,29 +1,25 @@
 ﻿namespace AlgEff
 
-(*
-type Effect<'a> =
-    | Log of (string * (unit -> 'a))
-*)
-
 type Effect<'a> =
     abstract member Map : ('a -> 'b) -> Effect<'b>
 
-type AlgEffProgram<'a> =
-    | Free of Effect<AlgEffProgram<'a>>
+type AlgEffProgram<'ctx, 'a> =
+    | Free of Effect<AlgEffProgram<'ctx, 'a>>
     | Pure of 'a
 
 module AlgEffProgram =
 
-    let rec bind f = function
+    let rec bind (f : 'a -> AlgEffProgram<'ctx, 'b>) (program : AlgEffProgram<'ctx, 'a>) =
+        match program with
         | Free effect ->
             effect.Map(bind f) |> Free
         | Pure x -> f x
 
 type AlgEffBuilder() =
-    member this.Bind(x, f) = AlgEffProgram.bind f x
-    member this.Return(x) = Pure x
-    member this.ReturnFrom(x) = x
-    member this.Zero() = Pure ()
+    member __.Bind(x, f) = AlgEffProgram.bind f x
+    member __.Return(x) = Pure x
+    member __.ReturnFrom(x) = x
+    member __.Zero() = Pure ()
 
 [<AutoOpen>]
 module AutoOpen =
@@ -37,9 +33,12 @@ type Log<'a>(str: string, next : unit -> 'a) =
     member __.String = str
     member __.Next = next
 
+type Log = interface end
+
 module Log =
 
-    let write str = Free (Log(str, Pure))
+    let write<'ctx when 'ctx :> Log> str : AlgEffProgram<'ctx, _> =
+        Free (Log(str, Pure))
 
     let writef fmt = Printf.ksprintf write fmt
 
@@ -61,11 +60,23 @@ type WriteLine<'a>(str: string, next : unit -> 'a) =
     member __.String = str
     member __.Next = next
 
+type ReadLine<'a>(next : string -> 'a) =
+    interface Effect<'a> with
+        member __.Map(f) =
+            ReadLine(next >> f) :> _
+    member __.Next = next
+
+type Console = interface end
+
 module Console =
 
-    let writeln str = Free (WriteLine(str, Pure))
+    let writeln<'ctx when 'ctx :> Console> str : AlgEffProgram<'ctx, _> =
+        Free (WriteLine(str, Pure))
 
     let writelnf fmt = Printf.ksprintf writeln fmt
+
+    let readln<'ctx when 'ctx :> Console> : AlgEffProgram<'ctx, _> =
+        Free (ReadLine(Pure))
 
     let handle<'a> =
         {|
