@@ -1,36 +1,79 @@
 ﻿namespace AlgEff
 
-type Effect<'result> =
-    | Log of string * (unit -> Effect<'result>)
-    | Result of 'result
+(*
+type Effect<'a> =
+    | Log of (string * (unit -> 'a))
+*)
 
-module Effect =
+type Effect<'a> =
+    abstract member Map : ('a -> 'b) -> Effect<'b>
+
+type AlgEffProgram<'a> =
+    | Free of Effect<AlgEffProgram<'a>>
+    | Pure of 'a
+
+module AlgEffProgram =
 
     let rec bind f = function
-        | Log (str, cont) ->
-            Log (str, fun () ->
-                cont () |> bind f)
-        | Result result -> f result
+        | Free effect ->
+            effect.Map(bind f) |> Free
+        | Pure x -> f x
 
-    let handle effect =
-
-        let rec loop log = function
-            | Log (str, cont) ->
-                let log' = str :: log
-                loop log' (cont ())
-            | Result result -> result, log
-
-        let result, log = loop [] effect
-        result, log |> List.rev
-
-    let log str = Log (str, fun () -> Result ())
-
-    let logf fmt = Printf.ksprintf log fmt
-
-type EffectBuilder() =
-    member __.Return(value) = Result value
-    member __.Bind(effect, f) = Effect.bind f effect
+type AlgEffBuilder() =
+    member this.Bind(x, f) = AlgEffProgram.bind f x
+    member this.Return(x) = Pure x
+    member this.ReturnFrom(x) = x
+    member this.Zero() = Pure ()
 
 [<AutoOpen>]
 module AutoOpen =
-    let effect = EffectBuilder()
+
+    let effect = AlgEffBuilder()
+
+type Log<'a>(str: string, next : unit -> 'a) =
+    interface Effect<'a> with
+        member __.Map(f) =
+            Log(str, next >> f) :> _
+    member __.String = str
+    member __.Next = next
+
+module Log =
+
+    let write str = Free (Log(str, Pure))
+
+    let writef fmt = Printf.ksprintf write fmt
+
+    let handle<'a> =
+        {|
+            Init = List.empty<string>
+            Step =
+                fun acc (effect : Log<'a>) ->
+                    let state = effect.String :: acc
+                    let next = effect.Next ()
+                    state, next
+            Final = List.rev
+        |}
+
+type WriteLine<'a>(str: string, next : unit -> 'a) =
+    interface Effect<'a> with
+        member __.Map(f) =
+            WriteLine(str, next >> f) :> _
+    member __.String = str
+    member __.Next = next
+
+module Console =
+
+    let writeln str = Free (WriteLine(str, Pure))
+
+    let writelnf fmt = Printf.ksprintf writeln fmt
+
+    let handle<'a> =
+        {|
+            Init = List.empty<string>
+            Step =
+                fun acc (effect : WriteLine<'a>) ->
+                    let state = effect.String :: acc
+                    let next = effect.Next ()
+                    state, next
+            Final = List.rev
+        |}

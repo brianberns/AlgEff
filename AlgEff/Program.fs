@@ -2,14 +2,13 @@
 
 module Program =
 
-    open Effect
-
     let hypotenuse a b =
         effect {
-            do! logf "Side a: %g" a
-            do! logf "Side b: %g" b
+            do! Log.writef "Side a: %g" a
+            do! Log.writef "Side b: %g" b
             let c = sqrt <| (a*a + b*b)
-            do! logf "Side c: %g" c
+            do! Log.writef "Side c: %g" c
+            do! Console.writelnf "%g %g -> %g" a b c
             return c
         }
 
@@ -19,15 +18,16 @@ module Program =
         for msg in log do
             printfn "   %s" msg
 
+    (*
     let run a b =
         let c, log =
             hypotenuse a b
                 |> handle
         dump log
         printfn "Final result: %g" c
+    *)
 
     [<EntryPoint>]
     let main argv =
-        run 3.0 4.0
-        run 5.0 12.0
+        let program = hypotenuse 3.0 4.0
         0
