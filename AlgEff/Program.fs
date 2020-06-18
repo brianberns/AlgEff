@@ -3,7 +3,6 @@
 module Program =
 
     let hypotenuse a b =
-        let moo = Log.writef "moo"
         effect {
             do! Log.writef "Side a: %g" a
             do! Log.writef "Side b: %g" b
