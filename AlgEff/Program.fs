@@ -2,14 +2,12 @@
 
 module Program =
 
-    let hypotenuse a b =
+    let greet () =
         effect {
-            do! Log.writef "Side a: %g" a
-            do! Log.writef "Side b: %g" b
-            let c = sqrt <| (a*a + b*b)
-            do! Log.writef "Side c: %g" c
-            do! Console.writelnf "%g %g -> %g" a b c
-            return c
+            do! Console.writeln "What is your name?"
+            let! name = Console.readln
+            do! Console.writelnf "Hello %s" name
+            do! Log.writef "Name is %s" name
         }
 
     let dump log =
@@ -18,21 +16,18 @@ module Program =
         for msg in log do
             printfn "   %s" msg
 
-    (*
-    let run a b =
-        let c, log =
-            hypotenuse a b
-                |> handle
-        dump log
-        printfn "Final result: %g" c
-    *)
+    type Handler() =
+        interface ConsoleHandler
+        interface LogHandler
 
-    type Handler =
-        inherit ConsoleHandler
-        inherit LogHandler
+        member __.Run<'res>() =
+            let consoleHandler = ConsoleHandler.handle<OpChain<Handler, 'res>> [ "John" ]
+            let logHandler = LogHandler.handle<OpChain<Handler, 'res>>
+            let state = consoleHandler.Init, logHandler.Init
+            ()
 
     [<EntryPoint>]
     let main argv =
-        let program : OpChain<Handler, _> = hypotenuse 3.0 4.0
+        let program : OpChain<Handler, _> = greet ()
         printfn "%A" program
         0
