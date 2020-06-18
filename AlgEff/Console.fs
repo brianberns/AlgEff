@@ -13,12 +13,7 @@ type ReadLineOp<'next>(next : string -> 'next) =
             ReadLineOp(next >> f) :> _
     member __.Next = next
 
-type ConsoleEffect<'a> =
-    | WriteLine of WriteLineOp<'a>
-    | ReadLine of ReadLineOp<'a>
-
-type ConsoleHandler =
-    abstract member GetHandler<'a> : unit -> EffectHandler<ConsoleEffect<'a>>
+type ConsoleHandler = interface end
 
 module Console =
 
@@ -46,7 +41,11 @@ module ConsoleHandler =
                 Output = []
             }
 
-    let handle<'a> input : EffectHandlerImpl<State, ConsoleEffect<'a>, 'a> =
+    type ConsoleEffect<'next> =
+        | WriteLine of WriteLineOp<'next>
+        | ReadLine of ReadLineOp<'next>
+
+    let handle<'next> input : EffectHandler<State, ConsoleEffect<'next>, 'next> =
 
         let handleEffect state = function
             | WriteLine op ->

@@ -19,10 +19,11 @@ type OpChain<'ctx, 'res> =
 module OpChain =
 
     /// Binds two operation chains together.
-    let rec bind f = function
-        | Free effect ->
-            effect.Map(bind f) |> Free
-        | Pure x -> f x
+    let rec bind (f : _ -> OpChain<'ctx, _>) (chain : OpChain<'ctx, _>) =
+        match chain with
+            | Free op ->
+                op.Map(bind f) |> Free
+            | Pure x -> f x
 
 type OpChainBuilder() =
     member __.Bind(chain, f) = OpChain.bind f chain

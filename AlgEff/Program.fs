@@ -27,7 +27,12 @@ module Program =
         printfn "Final result: %g" c
     *)
 
+    type Handler =
+        inherit ConsoleHandler
+        inherit LogHandler
+
     [<EntryPoint>]
     let main argv =
-        let program = hypotenuse 3.0 4.0
+        let program : OpChain<Handler, _> = hypotenuse 3.0 4.0
+        printfn "%A" program
         0

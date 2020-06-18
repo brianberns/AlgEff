@@ -1,29 +1,28 @@
 ﻿namespace AlgEff
 
-type LogOp<'a>(str: string, next : unit -> 'a) =
-    interface Op<'a> with
+type LogOp<'next>(str: string, next : unit -> 'next) =
+    interface Op<'next> with
         member __.Map(f) =
-            Log(str, next >> f) :> _
+            LogOp(str, next >> f) :> _
     member __.String = str
     member __.Next = next
 
-type LogHandler =
-    abstract member Handle<'a> : Log<'a> -> unit
+type LogHandler = interface end
 
 module Log =
 
     let write<'ctx when 'ctx :> LogHandler> str : OpChain<'ctx, _> =
-        Free (Log(str, Pure))
+        Free (LogOp(str, Pure))
 
     let writef fmt = Printf.ksprintf write fmt
 
-    let handle<'a> =
-        {|
-            Init = List.empty<string>
+    let handle<'next> =
+        {
+            Init = []
             Step =
-                fun acc (effect : Log<'a>) ->
+                fun acc (effect : LogOp<'next>) ->
                     let state = effect.String :: acc
                     let next = effect.Next ()
                     state, next
             Final = List.rev
-        |}
+        }
