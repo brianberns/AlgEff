@@ -1,19 +1,27 @@
 ﻿namespace AlgEff
 
-type WriteLineOp<'next>(str: string, next : unit -> 'next) =
-    interface Op<'next> with
+type ConsoleOp<'next> =
+    inherit Op<'next>
+    abstract member Effect : ConsoleEffect<'next>
+
+and WriteLineOp<'next>(str: string, next : unit -> 'next) =
+    interface ConsoleOp<'next> with
         member __.Map(f) =
             WriteLineOp(str, next >> f) :> _
+        member this.Effect = WriteLine this
     member __.String = str
     member __.Next = next
 
-type ReadLineOp<'next>(next : string -> 'next) =
-    interface Op<'next> with
+and ReadLineOp<'next>(next : string -> 'next) =
+    interface ConsoleOp<'next> with
         member __.Map(f) =
             ReadLineOp(next >> f) :> _
+        member this.Effect = ReadLine this
     member __.Next = next
 
-type ConsoleHandler = interface end
+and ConsoleEffect<'next> =
+    | WriteLine of WriteLineOp<'next>
+    | ReadLine of ReadLineOp<'next>
 
 module Console =
 
@@ -41,26 +49,23 @@ module ConsoleHandler =
                 Output = []
             }
 
-    type ConsoleEffect<'next> =
-        | WriteLine of WriteLineOp<'next>
-        | ReadLine of ReadLineOp<'next>
+    let handle<'next> input : EffectHandler<State, ConsoleOp<'next>, 'next> =
 
-    let handle<'next> input : EffectHandler<State, ConsoleEffect<'next>, 'next> =
-
-        let handleEffect state = function
-            | WriteLine op ->
-                let state' =
-                    { state with Output = op.String :: state.Output }
-                let next = op.Next ()
-                state', next
-            | ReadLine op ->
-                match state.Input with
-                    | head :: tail ->
-                        let state' =
-                            { state with Input = tail }
-                        let next = op.Next head
-                        state', next
-                    | _ -> failwith "No more nput"
+        let handleEffect state (consoleOp : ConsoleOp<_>) =
+            match consoleOp.Effect with
+                | WriteLine op ->
+                    let state' =
+                        { state with Output = op.String :: state.Output }
+                    let next = op.Next ()
+                    state', next
+                | ReadLine op ->
+                    match state.Input with
+                        | head :: tail ->
+                            let state' =
+                                { state with Input = tail }
+                            let next = op.Next head
+                            state', next
+                        | _ -> failwith "No more nput"
 
         let final state =
             { state with Output = state.Output |> List.rev }

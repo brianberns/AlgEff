@@ -24,6 +24,9 @@ module Program =
             let consoleHandler = ConsoleHandler.handle<OpChain<Handler, 'res>> [ "John" ]
             let logHandler = LogHandler.handle<OpChain<Handler, 'res>>
             let state = consoleHandler.Init, logHandler.Init
+
+            let rec loop op =
+                
             ()
 
     [<EntryPoint>]
