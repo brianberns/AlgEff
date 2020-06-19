@@ -1,41 +1,44 @@
 ﻿namespace AlgEff
 
-type ConsoleOp<'next> =
-    inherit Op<'next>
-    abstract member Effect : ConsoleEffect<'next>
+type ConsoleEff<'next> =
+    inherit Effect<'next>
+    abstract member Case : ConsoleEffSum<'next>
 
-and WriteLineOp<'next>(str: string, next : unit -> 'next) =
-    interface ConsoleOp<'next> with
+and WriteLineEff<'next>(str: string, next : unit -> 'next) =
+    interface ConsoleEff<'next> with
         member __.Map(f) =
-            WriteLineOp(str, next >> f) :> _
-        member this.Effect = WriteLine this
+            WriteLineEff(str, next >> f) :> _
+        member this.Case = WriteLine this
     member __.String = str
     member __.Next = next
 
-and ReadLineOp<'next>(next : string -> 'next) =
-    interface ConsoleOp<'next> with
+and ReadLineEff<'next>(next : string -> 'next) =
+    interface ConsoleEff<'next> with
         member __.Map(f) =
-            ReadLineOp(next >> f) :> _
-        member this.Effect = ReadLine this
+            ReadLineEff(next >> f) :> _
+        member this.Case = ReadLine this
     member __.Next = next
 
-and ConsoleEffect<'next> =
-    | WriteLine of WriteLineOp<'next>
-    | ReadLine of ReadLineOp<'next>
+/// Sum type for console effects.
+and ConsoleEffSum<'next> =
+    | WriteLine of WriteLineEff<'next>
+    | ReadLine of ReadLineEff<'next>
+
+(* Handler *)
 
 type ConsoleHandler<'state, 'next> =
-    inherit EffectHandler<'state, ConsoleOp<'next>, 'next>
+    inherit EffectHandler<'state, ConsoleEff<'next>, 'next>
 
-type ConsoleHandlerCalc<'res> =
+type ConsoleHandlerOp<'res> =
     abstract member ApplyTo<'state, 'next> : ConsoleHandler<'state, 'next> -> 'res
 
 type ConsoleHandlerCarton =
-    abstract member ApplyCalc<'res> : ConsoleHandlerCalc<'res> -> 'res
+    abstract member ApplyOp<'res> : ConsoleHandlerOp<'res> -> 'res
 
 type ConsoleHandlerCartonImpl<'state, 'next>(consoleHandler : ConsoleHandler<'state, 'next>) =
     interface ConsoleHandlerCarton with
-        member __.ApplyCalc<'res>(calc : ConsoleHandlerCalc<'res>) =
-            calc.ApplyTo(consoleHandler)
+        member __.ApplyOp<'res>(op : ConsoleHandlerOp<'res>) =
+            op.ApplyTo(consoleHandler)
 
 type ConsoleHandlerCartonImpl private () =
     static member Create<'state, 'next>(consoleHandler) =
@@ -45,13 +48,13 @@ type ConsoleContext = ConsoleHandlerCarton
 
 module Console =
 
-    let writeln<'ctx when 'ctx :> ConsoleContext> str : OpChain<'ctx, _> =
-        Free (WriteLineOp(str, Pure))
+    let writeln<'ctx when 'ctx :> ConsoleContext> str : EffectChain<'ctx, _> =
+        Free (WriteLineEff(str, Pure))
 
     let writelnf fmt = Printf.ksprintf writeln fmt
 
-    let readln<'ctx when 'ctx :> ConsoleContext> : OpChain<'ctx, _> =
-        Free (ReadLineOp(Pure))
+    let readln<'ctx when 'ctx :> ConsoleContext> : EffectChain<'ctx, _> =
+        Free (ReadLineEff(Pure))
 
 type ConsoleState =
     {
@@ -74,7 +77,7 @@ type ConsoleHandler<'next>(input) =
         member __.Start = ConsoleState.create input
 
         member __.Step(state, consoleOp) =
-            match consoleOp.Effect with
+            match consoleOp.Case with
                 | WriteLine op ->
                     let state' =
                         { state with Output = op.String :: state.Output }

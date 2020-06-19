@@ -1,9 +1,9 @@
 ﻿namespace AlgEff
 
-type LogOp<'next>(str: string, next : unit -> 'next) =
-    interface Op<'next> with
+type LogEff<'next>(str: string, next : unit -> 'next) =
+    interface Effect<'next> with
         member __.Map(f) =
-            LogOp(str, next >> f) :> _
+            LogEff(str, next >> f) :> _
     member __.String = str
     member __.Next = next
 
@@ -11,8 +11,8 @@ type LogHandler = interface end
 
 module Log =
 
-    let write<'ctx when 'ctx :> LogHandler> str : OpChain<'ctx, _> =
-        Free (LogOp(str, Pure))
+    let write<'ctx when 'ctx :> LogHandler> str : EffectChain<'ctx, _> =
+        Free (LogEff(str, Pure))
 
     let writef fmt = Printf.ksprintf write fmt
 

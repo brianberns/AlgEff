@@ -19,16 +19,16 @@ module Program =
 
     type Handler<'res>() =
 
-        let consoleHandler = ConsoleHandler<OpChain<Handler<'res>, 'res>>(["John"])
+        let consoleHandler = ConsoleHandler<EffectChain<Handler<'res>, 'res>>(["John"])
         // let logHandler = LogHandler.handle<OpChain<Handler<'res>, 'res>>
 
         let consoleHandlerCarton = ConsoleHandlerCartonImpl.Create(consoleHandler)
 
         interface ConsoleContext with
-            member __.ApplyCalc(calc) = consoleHandlerCarton.ApplyCalc(calc)
+            member __.ApplyOp(op) = consoleHandlerCarton.ApplyOp(op)
 
     [<EntryPoint>]
     let main argv =
-        let program : OpChain<Handler<int>, int> = greet ()
+        let program : EffectChain<Handler<int>, int> = greet ()
         printfn "%A" program
         0
