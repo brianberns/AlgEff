@@ -1,8 +1,6 @@
 ﻿namespace AlgEff
 
 type EffectHandler<'state, 'effect, 'next> =
-    {
-        Init : 'state
-        Step : 'state -> 'effect -> ('state * 'next)
-        Final : 'state -> 'state
-    }
+    abstract member Start : 'state
+    abstract member Step : 'state * 'effect -> ('state * 'next)
+    abstract member Finish : 'state -> 'state

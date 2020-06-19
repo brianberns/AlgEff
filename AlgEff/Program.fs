@@ -7,7 +7,8 @@ module Program =
             do! Console.writeln "What is your name?"
             let! name = Console.readln
             do! Console.writelnf "Hello %s" name
-            do! Log.writef "Name is %s" name
+            // do! Log.writef "Name is %s" name
+            return 0
         }
 
     let dump log =
@@ -16,21 +17,18 @@ module Program =
         for msg in log do
             printfn "   %s" msg
 
-    type Handler() =
-        interface ConsoleHandler
-        interface LogHandler
+    type Handler<'res>() =
 
-        member __.Run<'res>() =
-            let consoleHandler = ConsoleHandler.handle<OpChain<Handler, 'res>> [ "John" ]
-            let logHandler = LogHandler.handle<OpChain<Handler, 'res>>
-            let state = consoleHandler.Init, logHandler.Init
+        let consoleHandler = ConsoleHandler<OpChain<Handler<'res>, 'res>>(["John"])
+        // let logHandler = LogHandler.handle<OpChain<Handler<'res>, 'res>>
 
-            let rec loop op =
-                
-            ()
+        let consoleHandlerCarton = ConsoleHandlerCartonImpl.Create(consoleHandler)
+
+        interface ConsoleContext with
+            member __.ApplyCalc(calc) = consoleHandlerCarton.ApplyCalc(calc)
 
     [<EntryPoint>]
     let main argv =
-        let program : OpChain<Handler, _> = greet ()
+        let program : OpChain<Handler<int>, int> = greet ()
         printfn "%A" program
         0

@@ -23,35 +23,57 @@ and ConsoleEffect<'next> =
     | WriteLine of WriteLineOp<'next>
     | ReadLine of ReadLineOp<'next>
 
+type ConsoleHandler<'state, 'next> =
+    inherit EffectHandler<'state, ConsoleOp<'next>, 'next>
+
+type ConsoleHandlerCalc<'res> =
+    abstract member ApplyTo<'state, 'next> : ConsoleHandler<'state, 'next> -> 'res
+
+type ConsoleHandlerCarton =
+    abstract member ApplyCalc<'res> : ConsoleHandlerCalc<'res> -> 'res
+
+type ConsoleHandlerCartonImpl<'state, 'next>(consoleHandler : ConsoleHandler<'state, 'next>) =
+    interface ConsoleHandlerCarton with
+        member __.ApplyCalc<'res>(calc : ConsoleHandlerCalc<'res>) =
+            calc.ApplyTo(consoleHandler)
+
+type ConsoleHandlerCartonImpl private () =
+    static member Create<'state, 'next>(consoleHandler) =
+        ConsoleHandlerCartonImpl<'state, 'next>(consoleHandler) :> ConsoleHandlerCarton
+
+type ConsoleContext = ConsoleHandlerCarton
+
 module Console =
 
-    let writeln<'ctx when 'ctx :> ConsoleHandler> str : OpChain<'ctx, _> =
+    let writeln<'ctx when 'ctx :> ConsoleContext> str : OpChain<'ctx, _> =
         Free (WriteLineOp(str, Pure))
 
     let writelnf fmt = Printf.ksprintf writeln fmt
 
-    let readln<'ctx when 'ctx :> ConsoleHandler> : OpChain<'ctx, _> =
+    let readln<'ctx when 'ctx :> ConsoleContext> : OpChain<'ctx, _> =
         Free (ReadLineOp(Pure))
 
-module ConsoleHandler =
+type ConsoleState =
+    {
+        Input : List<string>
+        Output : List<string>
+    }
 
-    type State =
+module ConsoleState =
+
+    let create input =
         {
-            Input : List<string>
-            Output : List<string>
+            Input = input
+            Output = []
         }
 
-    module State =
+type ConsoleHandler<'next>(input) =
 
-        let create input =
-            {
-                Input = input
-                Output = []
-            }
+    interface ConsoleHandler<ConsoleState, 'next> with
 
-    let handle<'next> input : EffectHandler<State, ConsoleOp<'next>, 'next> =
+        member __.Start = ConsoleState.create input
 
-        let handleEffect state (consoleOp : ConsoleOp<_>) =
+        member __.Step(state, consoleOp) =
             match consoleOp.Effect with
                 | WriteLine op ->
                     let state' =
@@ -65,13 +87,7 @@ module ConsoleHandler =
                                 { state with Input = tail }
                             let next = op.Next head
                             state', next
-                        | _ -> failwith "No more nput"
+                        | _ -> failwith "No more input"
 
-        let final state =
+        member __.Finish(state) =
             { state with Output = state.Output |> List.rev }
-
-        {
-            Init = State.create input
-            Step = handleEffect          
-            Final = final
-        }

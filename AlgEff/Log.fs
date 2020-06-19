@@ -16,6 +16,7 @@ module Log =
 
     let writef fmt = Printf.ksprintf write fmt
 
+(*
 module LogHandler =
 
     let handle<'next> =
@@ -28,3 +29,4 @@ module LogHandler =
                     state, next
             Final = List.rev
         }
+*)
