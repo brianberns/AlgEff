@@ -24,27 +24,7 @@ and ConsoleEffSum<'next> =
     | WriteLine of WriteLineEff<'next>
     | ReadLine of ReadLineEff<'next>
 
-(* Handler *)
-
-type ConsoleHandler<'state, 'next> =
-    inherit EffectHandler<'state, ConsoleEff<'next>, 'next>
-
-type ConsoleHandlerOp<'res> =
-    abstract member ApplyTo<'state, 'next> : ConsoleHandler<'state, 'next> -> 'res
-
-type ConsoleHandlerCarton =
-    abstract member ApplyOp<'res> : ConsoleHandlerOp<'res> -> 'res
-
-type ConsoleHandlerCartonImpl<'state, 'next>(consoleHandler : ConsoleHandler<'state, 'next>) =
-    interface ConsoleHandlerCarton with
-        member __.ApplyOp<'res>(op : ConsoleHandlerOp<'res>) =
-            op.ApplyTo(consoleHandler)
-
-type ConsoleHandlerCartonImpl private () =
-    static member Create<'state, 'next>(consoleHandler) =
-        ConsoleHandlerCartonImpl<'state, 'next>(consoleHandler) :> ConsoleHandlerCarton
-
-type ConsoleContext = ConsoleHandlerCarton
+type ConsoleContext = interface end
 
 module Console =
 
@@ -55,6 +35,27 @@ module Console =
 
     let readln<'ctx when 'ctx :> ConsoleContext> : EffectChain<'ctx, _> =
         Free (ReadLineEff(Pure))
+
+(* Handler *)
+
+type ConsoleHandler<'state, 'next> =
+    inherit EffectHandler<'state, ConsoleEff<'next>, 'next>
+
+type ConsoleHandlerOp<'res> =
+    abstract member ApplyTo<'state, 'next> : ConsoleHandler<'state, 'next> -> 'res
+
+type ConsoleHandlerCarton =
+    inherit ConsoleContext
+    abstract member ApplyOp<'res> : ConsoleHandlerOp<'res> -> 'res
+
+type ConsoleHandlerCartonImpl<'state, 'next>(consoleHandler : ConsoleHandler<'state, 'next>) =
+    interface ConsoleHandlerCarton with
+        member __.ApplyOp<'res>(op : ConsoleHandlerOp<'res>) =
+            op.ApplyTo(consoleHandler)
+
+type ConsoleHandlerCartonImpl private () =
+    static member Create<'state, 'next>(consoleHandler) =
+        ConsoleHandlerCartonImpl<'state, 'next>(consoleHandler) :> ConsoleHandlerCarton
 
 type ConsoleState =
     {
@@ -70,9 +71,9 @@ module ConsoleState =
             Output = []
         }
 
-type ConsoleHandler<'next>(input) =
+type PureConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext>(input) =
 
-    interface ConsoleHandler<ConsoleState, 'next> with
+    interface ConsoleHandler<ConsoleState, EffectChain<'ctx, 'res>> with
 
         member __.Start = ConsoleState.create input
 

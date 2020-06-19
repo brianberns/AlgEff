@@ -7,28 +7,29 @@ module Program =
             do! Console.writeln "What is your name?"
             let! name = Console.readln
             do! Console.writelnf "Hello %s" name
-            // do! Log.writef "Name is %s" name
+            do! Log.writef "Name is %s" name
             return 0
         }
 
-    let dump log =
-        printfn ""
-        printfn "Log contains %A entries:" (log |> List.length)
-        for msg in log do
-            printfn "   %s" msg
+    type ProgramHandler<'res>() =
 
-    type Handler<'res>() =
-
-        let consoleHandler = ConsoleHandler<EffectChain<Handler<'res>, 'res>>(["John"])
-        // let logHandler = LogHandler.handle<OpChain<Handler<'res>, 'res>>
-
+        let consoleHandler = PureConsoleHandler<ProgramHandler<'res>, 'res>(["John"])
         let consoleHandlerCarton = ConsoleHandlerCartonImpl.Create(consoleHandler)
 
-        interface ConsoleContext with
+        let logHandler = PureLogHandler<ProgramHandler<'res>, 'res>()
+        let logHandlerCarton = LogHandlerCartonImpl.Create(logHandler)
+
+        interface ConsoleHandlerCarton with
             member __.ApplyOp(op) = consoleHandlerCarton.ApplyOp(op)
+
+        interface LogHandlerCarton with
+            member __.ApplyOp(op) = logHandlerCarton.ApplyOp(op)
+
+        static member Create(_ : EffectChain<ProgramHandler<'res>, 'res>) =
+            ProgramHandler<'res>()
 
     [<EntryPoint>]
     let main argv =
-        let program : EffectChain<Handler<int>, int> = greet ()
+        let program = greet () |> ProgramHandler.Create
         printfn "%A" program
         0
