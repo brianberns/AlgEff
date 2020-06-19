@@ -4,20 +4,20 @@ type ConsoleEff<'next> =
     inherit Effect<'next>
     abstract member Case : ConsoleEffSum<'next>
 
-and WriteLineEff<'next>(str: string, next : unit -> 'next) =
+and WriteLineEff<'next>(str : string, cont : unit -> 'next) =
     interface ConsoleEff<'next> with
         member __.Map(f) =
-            WriteLineEff(str, next >> f) :> _
+            WriteLineEff(str, cont >> f) :> _
         member this.Case = WriteLine this
     member __.String = str
-    member __.Next = next
+    member __.Cont = cont
 
-and ReadLineEff<'next>(next : string -> 'next) =
+and ReadLineEff<'next>(cont : string -> 'next) =
     interface ConsoleEff<'next> with
         member __.Map(f) =
-            ReadLineEff(next >> f) :> _
+            ReadLineEff(cont >> f) :> _
         member this.Case = ReadLine this
-    member __.Next = next
+    member __.Cont = cont
 
 /// Sum type for console effects.
 and ConsoleEffSum<'next> =
@@ -76,19 +76,19 @@ type ConsoleHandler<'next>(input) =
 
         member __.Start = ConsoleState.create input
 
-        member __.Step(state, consoleOp) =
-            match consoleOp.Case with
-                | WriteLine op ->
+        member __.Step(state, consoleEff) =
+            match consoleEff.Case with
+                | WriteLine eff ->
                     let state' =
-                        { state with Output = op.String :: state.Output }
-                    let next = op.Next ()
+                        { state with Output = eff.String :: state.Output }
+                    let next = eff.Cont()
                     state', next
-                | ReadLine op ->
+                | ReadLine eff ->
                     match state.Input with
                         | head :: tail ->
                             let state' =
                                 { state with Input = tail }
-                            let next = op.Next head
+                            let next = eff.Cont(head)
                             state', next
                         | _ -> failwith "No more input"
 

@@ -1,11 +1,11 @@
 ﻿namespace AlgEff
 
-type LogEff<'next>(str: string, next : unit -> 'next) =
+type LogEff<'next>(str : string, cont : unit -> 'next) =
     interface Effect<'next> with
         member __.Map(f) =
-            LogEff(str, next >> f) :> _
+            LogEff(str, cont >> f) :> _
     member __.String = str
-    member __.Next = next
+    member __.Cont = cont
 
 type LogHandler = interface end
 
@@ -25,7 +25,7 @@ module LogHandler =
             Step =
                 fun acc (effect : LogOp<'next>) ->
                     let state = effect.String :: acc
-                    let next = effect.Next ()
+                    let next = effect.Cont()
                     state, next
             Final = List.rev
         }
