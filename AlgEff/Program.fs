@@ -8,7 +8,7 @@ module Program =
             let! name = Console.readln
             do! Console.writelnf "Hello %s" name
             do! Log.writef "Name is %s" name
-            return 0
+            return name
         }
 
     type ProgramHandler<'res>() as this =
@@ -30,7 +30,12 @@ module Program =
 
             let rec loop state = function
                 | Free effect ->
-                    let state', next = handler.Step(state, effect)
+                    let choice =
+                        match effect with
+                            | :? ConsoleEff<EffectChain<ProgramHandler<'res>, 'res>> as consoleEff -> Choice1Of2 consoleEff
+                            | :? LogEff<EffectChain<ProgramHandler<'res>, 'res>> as logEff -> Choice2Of2 logEff
+                            | _ -> failwith "Unhandled effect"
+                    let state', next = handler.Step(state, choice)
                     loop state' next
                 | Pure result ->
                     state, result
@@ -40,6 +45,8 @@ module Program =
 
     [<EntryPoint>]
     let main argv =
-        let program = greet () |> ProgramHandler.run
-        printfn "%A" program
+        let (console, log), name = greet () |> ProgramHandler.run
+        printfn "Console: %A" console
+        printfn "Log: %A" log
+        printfn "Name: %s" name
         0
