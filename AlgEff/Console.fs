@@ -49,17 +49,17 @@ type ConsoleState =
 
 module ConsoleState =
 
-    let create input =
+    let create input output =
         {
             Input = input
-            Output = []
+            Output = output
         }
 
 type PureConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext>(input) =
 
     interface ConsoleHandler<ConsoleState, EffectChain<'ctx, 'res>> with
 
-        member __.Start = ConsoleState.create input
+        member __.Start = ConsoleState.create input []
 
         member __.Step(state, consoleEff) =
             match consoleEff.Case with
@@ -72,10 +72,8 @@ type PureConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext>(input) =
                     match state.Input with
                         | head :: tail ->
                             let state' =
-                                {
-                                    Input = tail
-                                    Output = (head :: state.Output)
-                                }   
+                                let output = head :: state.Output
+                                ConsoleState.create tail output
                             let next = eff.Cont(head)
                             state', next
                         | _ -> failwith "No more input"
