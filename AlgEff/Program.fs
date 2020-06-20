@@ -15,22 +15,28 @@ module Program =
 
         let consoleHandler = PureConsoleHandler.Create<_, 'res>(this, ["John"])
         let logHandler = PureLogHandler.Create<_, 'res>(this)
+        let handler = CombinedEffectHandler(consoleHandler, logHandler)
 
         interface ConsoleContext
         interface LogContext
 
-        member __.ConsoleHandler = consoleHandler :> EffectHandler<_, _, _>
-        member __.LogHandler = logHandler :> EffectHandler<_, _, _>
+        member __.Handler = handler :> EffectHandler<_, _, _>
 
     module ProgramHandler =
 
-        let create (_ : EffectChain<ProgramHandler<'res>, 'res>) =
-            ProgramHandler<'res>()
+        let run (program : EffectChain<ProgramHandler<'res>, 'res>) =
 
-        let run (_ : EffectChain<ProgramHandler<'res>, 'res>) =
-            let handler = ProgramHandler<'res>()
-            let state = handler.ConsoleHandler.Start, handler.LogHandler.Start
-            state
+            let handler = ProgramHandler<'res>().Handler
+
+            let rec loop state = function
+                | Free effect ->
+                    let state', next = handler.Step(state, effect)
+                    loop state' next
+                | Pure result ->
+                    state, result
+
+            loop handler.Start program
+                
 
     [<EntryPoint>]
     let main argv =
