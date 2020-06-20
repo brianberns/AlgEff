@@ -95,3 +95,9 @@ type PureConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext>(input) =
 
         member __.Finish(state) =
             { state with Output = state.Output |> List.rev }
+
+type PureConsoleHandler private () =
+
+    static member CreateCarton<'ctx, 'res when 'ctx :> ConsoleContext>(_ : 'ctx, input) =
+        PureConsoleHandler<'ctx, 'res>(input)
+            |> ConsoleHandlerCartonImpl.Create

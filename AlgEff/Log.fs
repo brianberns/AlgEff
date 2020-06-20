@@ -49,3 +49,9 @@ type PureLogHandler<'ctx, 'res when 'ctx :> LogContext>() =
             state, next
 
         member __.Finish(log) = List.rev log
+
+type PureLogHandler private () =
+
+    static member CreateCarton<'ctx, 'res when 'ctx :> LogContext>(_ : 'ctx) =
+        PureLogHandler<'ctx, 'res>()
+            |> LogHandlerCartonImpl.Create
