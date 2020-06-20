@@ -13,21 +13,27 @@ module Program =
 
     type ProgramHandler<'res>() as this =
 
-        let consoleHandlerCarton =
-            PureConsoleHandler.CreateCarton(this, ["John"])
-        let logHandlerCarton =
-            PureLogHandler.CreateCarton(this)
+        let consoleHandler = PureConsoleHandler.Create<_, 'res>(this, ["John"])
+        let logHandler = PureLogHandler.Create<_, 'res>(this)
 
-        interface ConsoleHandlerCarton with
-            member __.ApplyOp(op) = consoleHandlerCarton.ApplyOp(op)
-        interface LogHandlerCarton with
-            member __.ApplyOp(op) = logHandlerCarton.ApplyOp(op)
+        interface ConsoleContext
+        interface LogContext
 
-        static member Create(_ : EffectChain<ProgramHandler<'res>, 'res>) =
+        member __.ConsoleHandler = consoleHandler :> EffectHandler<_, _, _>
+        member __.LogHandler = logHandler :> EffectHandler<_, _, _>
+
+    module ProgramHandler =
+
+        let create (_ : EffectChain<ProgramHandler<'res>, 'res>) =
             ProgramHandler<'res>()
+
+        let run (_ : EffectChain<ProgramHandler<'res>, 'res>) =
+            let handler = ProgramHandler<'res>()
+            let state = handler.ConsoleHandler.Start, handler.LogHandler.Start
+            state
 
     [<EntryPoint>]
     let main argv =
-        let program = greet () |> ProgramHandler.Create
+        let program = greet () |> ProgramHandler.run
         printfn "%A" program
         0

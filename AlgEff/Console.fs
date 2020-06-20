@@ -41,22 +41,6 @@ module Console =
 type ConsoleHandler<'state, 'next> =
     inherit EffectHandler<'state, ConsoleEff<'next>, 'next>
 
-type ConsoleHandlerOp<'res> =
-    abstract member ApplyTo<'state, 'next> : ConsoleHandler<'state, 'next> -> 'res
-
-type ConsoleHandlerCarton =
-    inherit ConsoleContext
-    abstract member ApplyOp<'res> : ConsoleHandlerOp<'res> -> 'res
-
-type ConsoleHandlerCartonImpl<'state, 'next>(consoleHandler : ConsoleHandler<'state, 'next>) =
-    interface ConsoleHandlerCarton with
-        member __.ApplyOp<'res>(op : ConsoleHandlerOp<'res>) =
-            op.ApplyTo(consoleHandler)
-
-type ConsoleHandlerCartonImpl private () =
-    static member Create<'state, 'next>(consoleHandler) =
-        ConsoleHandlerCartonImpl<'state, 'next>(consoleHandler) :> ConsoleHandlerCarton
-
 type ConsoleState =
     {
         Input : List<string>
@@ -98,6 +82,5 @@ type PureConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext>(input) =
 
 type PureConsoleHandler private () =
 
-    static member CreateCarton<'ctx, 'res when 'ctx :> ConsoleContext>(_ : 'ctx, input) =
+    static member Create<'ctx, 'res when 'ctx :> ConsoleContext>(_ : 'ctx, input) =
         PureConsoleHandler<'ctx, 'res>(input)
-            |> ConsoleHandlerCartonImpl.Create

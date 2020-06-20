@@ -21,22 +21,6 @@ module Log =
 type LogHandler<'state, 'next> =
     inherit EffectHandler<'state, LogEff<'next>, 'next>
 
-type LogHandlerOp<'res> =
-    abstract member ApplyTo<'state, 'next> : LogHandler<'state, 'next> -> 'res
-
-type LogHandlerCarton =
-    inherit LogContext
-    abstract member ApplyOp<'res> : LogHandlerOp<'res> -> 'res
-
-type LogHandlerCartonImpl<'state, 'next>(logHandler : LogHandler<'state, 'next>) =
-    interface LogHandlerCarton with
-        member __.ApplyOp<'res>(op : LogHandlerOp<'res>) =
-            op.ApplyTo(logHandler)
-
-type LogHandlerCartonImpl private () =
-    static member Create<'state, 'next>(logHandler) =
-        LogHandlerCartonImpl<'state, 'next>(logHandler) :> LogHandlerCarton
-
 type PureLogHandler<'ctx, 'res when 'ctx :> LogContext>() =
 
     interface LogHandler<List<string>, EffectChain<'ctx, 'res>> with
@@ -52,6 +36,5 @@ type PureLogHandler<'ctx, 'res when 'ctx :> LogContext>() =
 
 type PureLogHandler private () =
 
-    static member CreateCarton<'ctx, 'res when 'ctx :> LogContext>(_ : 'ctx) =
+    static member Create<'ctx, 'res when 'ctx :> LogContext>(_ : 'ctx) =
         PureLogHandler<'ctx, 'res>()
-            |> LogHandlerCartonImpl.Create
