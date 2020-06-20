@@ -24,7 +24,7 @@ module Program =
 
     module ProgramHandler =
 
-        let run (program : EffectChain<ProgramHandler<'res>, 'res>) =
+        let run program =
 
             let handler = ProgramHandler<'res>().Handler
 
@@ -40,13 +40,14 @@ module Program =
                 | Pure result ->
                     state, result
 
-            loop handler.Start program
-                
+            let state, result = loop handler.Start program
+            result, handler.Finish(state)
 
     [<EntryPoint>]
     let main argv =
-        let (console, log), name = greet () |> ProgramHandler.run
-        printfn "Console: %A" console
+        let name, (console, log) = greet () |> ProgramHandler.run
+        printfn "Console input: %A" console.Input
+        printfn "Console output: %A" console.Output
         printfn "Log: %A" log
         printfn "Name: %s" name
         0

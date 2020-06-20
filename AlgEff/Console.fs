@@ -72,7 +72,10 @@ type PureConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext>(input) =
                     match state.Input with
                         | head :: tail ->
                             let state' =
-                                { state with Input = tail }
+                                {
+                                    Input = tail
+                                    Output = (head :: state.Output)
+                                }   
                             let next = eff.Cont(head)
                             state', next
                         | _ -> failwith "No more input"
