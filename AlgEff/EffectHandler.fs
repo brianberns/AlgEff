@@ -1,6 +1,6 @@
 ﻿namespace AlgEff
 
-type EffectHandler<'state, 'effect, 'next, 'finish when 'effect :> Effect<'next>> =
+type EffectHandler<'effect, 'next, 'state, 'finish when 'effect :> Effect<'next>> =
     {
         Start : 'state
         Step : ('state * 'effect) -> ('state * 'next)
@@ -32,8 +32,8 @@ module EffectHandler =
         result, handler.Finish(state)
 
     let combine
-        (handler1 : EffectHandler<_, 'effect1, _, _>)
-        (handler2 : EffectHandler<_, 'effect2, _, _>) =
+        (handler1 : EffectHandler<'effect1, _, _, _>)
+        (handler2 : EffectHandler<'effect2, _, _, _>) =
 
         let start = handler1.Start, handler2.Start
 

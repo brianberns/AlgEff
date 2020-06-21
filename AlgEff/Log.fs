@@ -21,8 +21,8 @@ module Log =
 
 (* Handler *)
 
-type LogHandler<'state, 'next> =
-    EffectHandler<'state, LogEff<'next>, 'next, 'state>
+type LogHandler<'next, 'state> =
+    EffectHandler<LogEff<'next>, 'next, 'state, 'state>
 
 module LogHandler =
 

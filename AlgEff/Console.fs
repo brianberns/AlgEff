@@ -49,8 +49,8 @@ module Console =
 
 (* Handler *)
 
-type ConsoleHandler<'state, 'next> =
-    EffectHandler<'state, ConsoleEff<'next>, 'next, 'state>
+type ConsoleHandler<'next, 'state> =
+    EffectHandler<ConsoleEff<'next>, 'next, 'state, 'state>
 
 type ConsoleState =
     {

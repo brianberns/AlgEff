@@ -50,7 +50,7 @@
     <Content Include="packages.config" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Effect.fs" />
-    <Compile Include="Handler.fs" />
+    <Compile Include="EffectHandler.fs" />
     <Compile Include="Log.fs" />
     <Compile Include="Console.fs" />
     <Compile Include="Program.fs" />
