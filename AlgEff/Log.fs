@@ -1,10 +1,13 @@
 ﻿namespace AlgEff
 
 type LogEff<'next>(str : string, cont : unit -> 'next) =
-    interface Effect<'next> with
-        member __.Map(f) =
-            LogEff(str, cont >> f) :> _
+    inherit Effect<'next>()
+
+    override __.Map(f) =
+        LogEff(str, cont >> f) :> _
+
     member __.String = str
+
     member __.Cont = cont
 
 type LogContext = interface end

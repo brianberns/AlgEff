@@ -2,9 +2,10 @@
 
 /// An individual effectful operation, such as writing to a console.
 /// The type parameter is used to chain effects together.
-type Effect<'a> =
+[<AbstractClass>]
+type Effect<'a>() =
 
-    /// Maps a function over an effect.
+    /// Maps a function over this effect.
     abstract member Map : ('a -> 'b) -> Effect<'b>
 
 /// A chain of effects (a.k.a. "free monad").
@@ -25,6 +26,7 @@ module EffectChain =
                 effect.Map(bind f) |> Free
             | Pure x -> f x
 
+/// Effect chain builder.
 type EffectChainBuilder() =
     member __.Bind(chain, f) = EffectChain.bind f chain
     member __.Return(x) = Pure x
@@ -34,4 +36,5 @@ type EffectChainBuilder() =
 [<AutoOpen>]
 module AutoOpen =
 
+    /// Effect chain builder.
     let effect = EffectChainBuilder()

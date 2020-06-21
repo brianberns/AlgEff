@@ -1,22 +1,32 @@
 ﻿namespace AlgEff
 
-type ConsoleEff<'next> =
-    inherit Effect<'next>
+/// Base console effect type.
+[<AbstractClass>]
+type ConsoleEff<'next>() =
+    inherit Effect<'next>()
+
     abstract member Case : ConsoleEffSum<'next>
 
 and WriteLineEff<'next>(str : string, cont : unit -> 'next) =
-    interface ConsoleEff<'next> with
-        member __.Map(f) =
-            WriteLineEff(str, cont >> f) :> _
-        member this.Case = WriteLine this
+    inherit ConsoleEff<'next>()
+
+    override __.Map(f) =
+        WriteLineEff(str, cont >> f) :> _
+
+    override this.Case = WriteLine this
+
     member __.String = str
+
     member __.Cont = cont
 
 and ReadLineEff<'next>(cont : string -> 'next) =
-    interface ConsoleEff<'next> with
-        member __.Map(f) =
-            ReadLineEff(cont >> f) :> _
-        member this.Case = ReadLine this
+    inherit ConsoleEff<'next>()
+
+    override __.Map(f) =
+        ReadLineEff(cont >> f) :> _
+
+    override this.Case = ReadLine this
+
     member __.Cont = cont
 
 /// Sum type for console effects.
@@ -24,6 +34,7 @@ and ConsoleEffSum<'next> =
     | WriteLine of WriteLineEff<'next>
     | ReadLine of ReadLineEff<'next>
 
+/// Console context.
 type ConsoleContext = interface end
 
 module Console =
