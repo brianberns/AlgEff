@@ -8,6 +8,20 @@ type EffectHandler<'state, 'effect, 'next when 'effect :> Effect<'next>>() =
     abstract member Finish : 'state -> 'state
     default __.Finish(state) = state
 
+module EffectHandler =
+
+    let run program (handler : EffectHandler<_, _, _>) =
+
+        let rec loop state = function
+            | Free effect ->
+                let state', next = handler.Step(state, effect)
+                loop state' next
+            | Pure result ->
+                state, result
+
+        let state, result = loop handler.Start program
+        result, handler.Finish(state)
+
 type CombinedEffectHandler<'state1, 'state2, 'effect1, 'effect2, 'next when 'effect1 :> Effect<'next> and 'effect2 :> Effect<'next>>
     (handler1 : EffectHandler<'state1, 'effect1, 'next>,
     handler2 : EffectHandler<'state2, 'effect2, 'next>) =

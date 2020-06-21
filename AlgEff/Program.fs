@@ -20,27 +20,15 @@ module Program =
         interface ConsoleContext
         interface LogContext
 
-        member __.Handler = handler :> EffectHandler<_, _, _>
+        member private __.Handler = handler
 
-    module ProgramHandler =
-
-        let run program =
-
-            let handler = ProgramHandler<'res>().Handler
-
-            let rec loop state = function
-                | Free effect ->
-                    let state', next = handler.Step(state, effect)
-                    loop state' next
-                | Pure result ->
-                    state, result
-
-            let state, result = loop handler.Start program
-            result, handler.Finish(state)
+        static member Run(program) =
+            ProgramHandler<'res>().Handler
+                |> EffectHandler.run program
 
     [<EntryPoint>]
     let main argv =
-        let name, (console, log) = greet () |> ProgramHandler.run
+        let name, (console, log) = greet () |> ProgramHandler.Run
         printfn "Console input: %A" console.Input
         printfn "Console output: %A" console.Output
         printfn "Log: %A" log
