@@ -1,4 +1,4 @@
-﻿namespace AlgEff
+namespace AlgEff
 
 type ProgramContext<'res>(consoleInput) as this =
     inherit ConcreteContext<'res>()
