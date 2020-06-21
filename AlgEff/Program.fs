@@ -30,12 +30,7 @@ module Program =
 
             let rec loop state = function
                 | Free effect ->
-                    let choice =
-                        match effect with
-                            | :? ConsoleEff<EffectChain<ProgramHandler<'res>, 'res>> as consoleEff -> Choice1Of2 consoleEff
-                            | :? LogEff<EffectChain<ProgramHandler<'res>, 'res>> as logEff -> Choice2Of2 logEff
-                            | _ -> failwith "Unhandled effect"
-                    let state', next = handler.Step(state, choice)
+                    let state', next = handler.Step(state, effect)
                     loop state' next
                 | Pure result ->
                     state, result
