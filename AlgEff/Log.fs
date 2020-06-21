@@ -22,7 +22,7 @@ module Log =
 (* Handler *)
 
 type LogHandler<'state, 'next> =
-    EffectHandler<'state, LogEff<'next>, 'next>
+    EffectHandler<'state, LogEff<'next>, 'next, 'state>
 
 module LogHandler =
 

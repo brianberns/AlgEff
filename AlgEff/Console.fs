@@ -50,7 +50,7 @@ module Console =
 (* Handler *)
 
 type ConsoleHandler<'state, 'next> =
-    EffectHandler<'state, ConsoleEff<'next>, 'next>
+    EffectHandler<'state, ConsoleEff<'next>, 'next, 'state>
 
 type ConsoleState =
     {
