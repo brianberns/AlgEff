@@ -23,7 +23,7 @@ module Log =
 
 module LogHandler =
 
-    let createPure<'ctx, 'res when 'ctx :> LogContext> (_ : 'ctx) =
+    let createPure<'ctx, 'res when 'ctx :> LogContext and 'ctx :> ConcreteContext<'res>> (_ : 'ctx) =
 
         let step (log, (logEff : LogEff<EffectChain<'ctx, 'res>>)) =
             let state = logEff.String :: log

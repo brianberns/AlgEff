@@ -68,8 +68,8 @@ module ConsoleState =
 
 module ConsoleHandler =
 
-    let createPure<'ctx, 'res when 'ctx :> ConsoleContext>
-        ((_ : 'ctx), input) =
+    let createPure<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> ConcreteContext<'res>>
+        input (_ : 'ctx) =
 
         let start = ConsoleState.create input []
 

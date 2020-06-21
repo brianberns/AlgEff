@@ -1,10 +1,12 @@
 ﻿namespace AlgEff
 
 type ProgramContext<'res>(consoleInput) as this =
+    inherit ConcreteContext<'res>()
 
-    let consoleHandler = ConsoleHandler.createPure<_, 'res>(this, consoleInput)
-    let logHandler = LogHandler.createPure<_, 'res>(this)
-    let handler = EffectHandler.combine consoleHandler logHandler
+    let handler =
+        let consoleHandler = this |> ConsoleHandler.createPure consoleInput
+        let logHandler = this |> LogHandler.createPure
+        EffectHandler.combine consoleHandler logHandler
     
     interface ConsoleContext
     interface LogContext

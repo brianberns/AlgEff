@@ -63,3 +63,5 @@ module EffectHandler =
         (combine3 handler1 handler2 handler3)
             |> add handler4
             |> map (fun ((s1, s2, s3), s4) -> s1, s2, s3, s4)
+
+type ConcreteContext<'res>() = class end
