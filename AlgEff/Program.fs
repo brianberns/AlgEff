@@ -11,24 +11,26 @@ module Program =
             return name
         }
 
-    type ProgramHandler<'res>() as this =
+    type ProgramHandler<'res>(consoleInput) as this =
 
-        let consoleHandler = PureConsoleHandler.Create<_, 'res>(this, ["John"])
-        let logHandler = PureLogHandler.Create<_, 'res>(this)
-        let handler = CombinedEffectHandler(consoleHandler, logHandler)
+        let consoleHandler = ConsoleHandler.createPureCtx<_, 'res>(this, consoleInput)
+        let logHandler = LogHandler.createPureCtx<_, 'res>(this)
+        let handler = EffectHandler.combine consoleHandler logHandler
 
         interface ConsoleContext
         interface LogContext
 
-        member private __.Handler = handler
+        member __.Run(program) =
+            handler |> EffectHandler.run program
 
-        static member Run(program) =
-            ProgramHandler<'res>().Handler
-                |> EffectHandler.run program
+    module ProgramHandler =
+
+        let run input program =
+            ProgramHandler(input).Run(program)
 
     [<EntryPoint>]
     let main argv =
-        let name, (console, log) = greet () |> ProgramHandler.Run
+        let name, (console, log) = greet () |> ProgramHandler.run ["John"]
         printfn "Console input: %A" console.Input
         printfn "Console output: %A" console.Output
         printfn "Log: %A" log

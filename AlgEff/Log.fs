@@ -21,23 +21,19 @@ module Log =
 
 (* Handler *)
 
-[<AbstractClass>]
-type LogHandler<'state, 'next>() =
-    inherit EffectHandler<'state, LogEff<'next>, 'next>()
+type LogHandler<'state, 'next> =
+    EffectHandler<'state, LogEff<'next>, 'next>
 
-type PureLogHandler<'ctx, 'res when 'ctx :> LogContext>() =
-    inherit LogHandler<List<string>, EffectChain<'ctx, 'res>>()
+module LogHandler =
 
-    override __.Start = []
+    let pureHandler<'ctx, 'res when 'ctx :> LogContext> : LogHandler<_, _> =
 
-    override __.Step(log, logEff) =
-        let state = logEff.String :: log
-        let next = logEff.Cont()
-        state, next
+        let step (log, (logEff : LogEff<EffectChain<'ctx, 'res>>)) =
+            let state = logEff.String :: log
+            let next = logEff.Cont()
+            state, next
 
-    override __.Finish(log) = List.rev log
+        EffectHandler.create [] step List.rev
 
-type PureLogHandler private () =
-
-    static member Create<'ctx, 'res when 'ctx :> LogContext>(_ : 'ctx) =
-        PureLogHandler<'ctx, 'res>()
+    let createPureCtx<'ctx, 'res when 'ctx :> LogContext> (_ : 'ctx) =
+        pureHandler<'ctx, 'res>
