@@ -23,14 +23,9 @@ module Program =
         member __.Run(program) =
             handler |> EffectHandler.run program
 
-    module ProgramHandler =
-
-        let run input program =
-            ProgramHandler(input).Run(program)
-
     [<EntryPoint>]
     let main argv =
-        let name, (console, log) = greet () |> ProgramHandler.run ["John"]
+        let name, (console, log) = greet () |> ProgramHandler(["John"]).Run
         printfn "Console input: %A" console.Input
         printfn "Console output: %A" console.Output
         printfn "Log: %A" log
