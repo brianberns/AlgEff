@@ -21,12 +21,9 @@ module Log =
 
 (* Handler *)
 
-type LogHandler<'next, 'state> =
-    EffectHandler<LogEff<'next>, 'next, 'state, 'state>
-
 module LogHandler =
 
-    let pureHandler<'ctx, 'res when 'ctx :> LogContext> : LogHandler<_, _> =
+    let createPure<'ctx, 'res when 'ctx :> LogContext> (_ : 'ctx) =
 
         let step (log, (logEff : LogEff<EffectChain<'ctx, 'res>>)) =
             let state = logEff.String :: log
@@ -34,6 +31,3 @@ module LogHandler =
             state, next
 
         EffectHandler.create [] step List.rev
-
-    let createPureCtx<'ctx, 'res when 'ctx :> LogContext> (_ : 'ctx) =
-        pureHandler<'ctx, 'res>

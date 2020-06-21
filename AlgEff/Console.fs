@@ -69,7 +69,7 @@ module ConsoleState =
 module ConsoleHandler =
 
     let createPure<'ctx, 'res when 'ctx :> ConsoleContext>
-        input : ConsoleHandler<_, _> =
+        ((_ : 'ctx), input) =
 
         let start = ConsoleState.create input []
 
@@ -94,6 +94,3 @@ module ConsoleHandler =
             { state with Output = state.Output |> List.rev }
 
         EffectHandler.create start step finish
-
-    let createPureCtx<'ctx, 'res when 'ctx :> ConsoleContext> ((_ : 'ctx), input) =
-        createPure<'ctx, 'res> input

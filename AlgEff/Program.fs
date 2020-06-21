@@ -1,5 +1,17 @@
 ﻿namespace AlgEff
 
+type ProgramContext<'res>(consoleInput) as this =
+
+    let consoleHandler = ConsoleHandler.createPure<_, 'res>(this, consoleInput)
+    let logHandler = LogHandler.createPure<_, 'res>(this)
+    let handler = EffectHandler.combine consoleHandler logHandler
+    
+    interface ConsoleContext
+    interface LogContext
+
+    member __.Run(program) =
+        handler |> EffectHandler.run program
+
 module Program =
 
     let greet () =
@@ -11,21 +23,9 @@ module Program =
             return name
         }
 
-    type ProgramHandler<'res>(consoleInput) as this =
-
-        let consoleHandler = ConsoleHandler.createPureCtx<_, 'res>(this, consoleInput)
-        let logHandler = LogHandler.createPureCtx<_, 'res>(this)
-        let handler = EffectHandler.combine consoleHandler logHandler
-
-        interface ConsoleContext
-        interface LogContext
-
-        member __.Run(program) =
-            handler |> EffectHandler.run program
-
     [<EntryPoint>]
     let main argv =
-        let name, (console, log) = greet () |> ProgramHandler(["John"]).Run
+        let name, (console, log) = greet () |> ProgramContext(["John"]).Run
         printfn "Console input: %A" console.Input
         printfn "Console output: %A" console.Output
         printfn "Log: %A" log
