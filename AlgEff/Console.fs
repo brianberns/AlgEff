@@ -49,8 +49,9 @@ module Console =
 
 (* Handler *)
 
-type ConsoleHandler<'state, 'next> =
-    inherit EffectHandler<'state, ConsoleEff<'next>, 'next>
+[<AbstractClass>]
+type ConsoleHandler<'state, 'next>() =
+    inherit EffectHandler<'state, ConsoleEff<'next>, 'next>()
 
 type ConsoleState =
     {
@@ -67,30 +68,29 @@ module ConsoleState =
         }
 
 type PureConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext>(input) =
+    inherit ConsoleHandler<ConsoleState, EffectChain<'ctx, 'res>>()
 
-    interface ConsoleHandler<ConsoleState, EffectChain<'ctx, 'res>> with
+    override __.Start = ConsoleState.create input []
 
-        member __.Start = ConsoleState.create input []
+    override __.Step(state, consoleEff) =
+        match consoleEff.Case with
+            | WriteLine eff ->
+                let state' =
+                    { state with Output = eff.String :: state.Output }
+                let next = eff.Cont()
+                state', next
+            | ReadLine eff ->
+                match state.Input with
+                    | head :: tail ->
+                        let state' =
+                            let output = head :: state.Output
+                            ConsoleState.create tail output
+                        let next = eff.Cont(head)
+                        state', next
+                    | _ -> failwith "No more input"
 
-        member __.Step(state, consoleEff) =
-            match consoleEff.Case with
-                | WriteLine eff ->
-                    let state' =
-                        { state with Output = eff.String :: state.Output }
-                    let next = eff.Cont()
-                    state', next
-                | ReadLine eff ->
-                    match state.Input with
-                        | head :: tail ->
-                            let state' =
-                                let output = head :: state.Output
-                                ConsoleState.create tail output
-                            let next = eff.Cont(head)
-                            state', next
-                        | _ -> failwith "No more input"
-
-        member __.Finish(state) =
-            { state with Output = state.Output |> List.rev }
+    override __.Finish(state) =
+        { state with Output = state.Output |> List.rev }
 
 type PureConsoleHandler private () =
 
