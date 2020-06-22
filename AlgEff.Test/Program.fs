@@ -7,7 +7,6 @@ type ProgramContext<'res>() as this =
     inherit ConcreteContext<'res>()
 
     let handler =
-        // let consoleHandler = this |> ConsoleHandler.createPure ["John"]
         let consoleHandler = this |> ConsoleHandler.createActual
         let logHandler = this |> LogHandler.createPure
         EffectHandler.combine consoleHandler logHandler
@@ -20,7 +19,7 @@ type ProgramContext<'res>() as this =
 
 module Program =
 
-    let greet () =
+    let greet =
         effect {
             do! Console.writeln "What is your name?"
             let! name = Console.readln
@@ -31,9 +30,7 @@ module Program =
 
     [<EntryPoint>]
     let main argv =
-        let name, (console, log) = greet () |> ProgramContext().Run
-        // printfn "Console input: %A" console.Input
-        // printfn "Console output: %A" console.Output
+        let name, ((), log) = greet |> ProgramContext().Run
         printfn "Log: %A" log
         printfn "Name: %s" name
         0
