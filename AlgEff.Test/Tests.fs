@@ -18,14 +18,14 @@ type PureConsoleLogContext<'res>(consoleInput) as this =
 
     member __.Handler = handler
 
-type PureStateContext<'state, 'res>(initial : 'state) as this =
+type PureStateContext<'res>(initial : int) as this =
     inherit ConcreteContext<'res>()
 
     let handler = this |> StateHandler.createPure initial
     
     interface StateContext
 
-    member __.Handler = handler
+    member __.Handler = EffectHandler.combine handler handler
 
 [<TestClass>]
 type TestClass () =
@@ -59,10 +59,10 @@ type TestClass () =
                 do! State.put (x + 1)
                 let! y = State.get
                 do! State.put (y + y)
-                return! State.get
+                let! (z : int) = State.get
+                return z.ToString()
             }
 
         let state =
-            PureStateContext(1).Handler
-                |> EffectHandler.run program
+            EffectHandler.run program (PureStateContext(1).Handler)
         printfn "%A" state
