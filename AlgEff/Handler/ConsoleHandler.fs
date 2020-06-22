@@ -2,9 +2,6 @@
 
 open AlgEff.Effect
 
-type ConsoleHandler<'next, 'state> =
-    EffectHandler<ConsoleEff<'next>, 'next, 'state, 'state>
-
 type ConsoleState =
     {
         Input : List<string>
@@ -21,6 +18,7 @@ module ConsoleState =
 
 module ConsoleHandler =
 
+    /// Pure console handler.
     let createPure<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> ConcreteContext<'res>>
         input (_ : 'ctx) =
 
@@ -47,3 +45,20 @@ module ConsoleHandler =
             { state with Output = state.Output |> List.rev }
 
         EffectHandler.create start step finish
+
+    /// Actual console handler.
+    let createActual<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> ConcreteContext<'res>>
+        (_ : 'ctx) =
+
+        let step ((), (consoleEff : ConsoleEff<EffectChain<'ctx, 'res>>)) =
+            let next =
+                match consoleEff.Case with
+                    | WriteLine eff ->
+                        System.Console.WriteLine(eff.String)
+                        eff.Cont()
+                    | ReadLine eff ->
+                        let str = System.Console.ReadLine()
+                        eff.Cont(str)
+            (), next
+
+        EffectHandler.create () step id

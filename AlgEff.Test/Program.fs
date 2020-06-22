@@ -3,11 +3,12 @@ namespace AlgEff
 open AlgEff.Effect
 open AlgEff.Handler
 
-type ProgramContext<'res>(consoleInput) as this =
+type ProgramContext<'res>() as this =
     inherit ConcreteContext<'res>()
 
     let handler =
-        let consoleHandler = this |> ConsoleHandler.createPure consoleInput
+        // let consoleHandler = this |> ConsoleHandler.createPure ["John"]
+        let consoleHandler = this |> ConsoleHandler.createActual
         let logHandler = this |> LogHandler.createPure
         EffectHandler.combine consoleHandler logHandler
     
@@ -30,9 +31,9 @@ module Program =
 
     [<EntryPoint>]
     let main argv =
-        let name, (console, log) = greet () |> ProgramContext(["John"]).Run
-        printfn "Console input: %A" console.Input
-        printfn "Console output: %A" console.Output
+        let name, (console, log) = greet () |> ProgramContext().Run
+        // printfn "Console input: %A" console.Input
+        // printfn "Console output: %A" console.Output
         printfn "Log: %A" log
         printfn "Name: %s" name
         0
