@@ -46,8 +46,9 @@ module EffectHandler =
 
     /// Combines two effect handlers.
     let combine
-        (handler1 : EffectHandler<'effect1, _, _, _>)
-        (handler2 : EffectHandler<'effect2, _, _, _>) =
+        (handler1 : EffectHandler<'effect1, 'next, _, _>)
+        (handler2 : EffectHandler<'effect2, 'next, _, _>)
+        : EffectHandler<Effect<'next>, 'next, _, _> =
 
         let start = handler1.Start, handler2.Start
 

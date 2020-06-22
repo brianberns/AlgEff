@@ -14,12 +14,11 @@ type ProgramContext<'res>() as this =
     interface ConsoleContext
     interface LogContext
 
-    member __.Run(program) =
-        handler |> EffectHandler.run program
+    member __.Handler = handler
 
 module Program =
 
-    let greet =
+    let program =
         effect {
             do! Console.writeln "What is your name?"
             let! name = Console.readln
@@ -30,7 +29,9 @@ module Program =
 
     [<EntryPoint>]
     let main argv =
-        let name, ((), log) = greet |> ProgramContext().Run
+        let name, ((), log) =
+            ProgramContext().Handler
+                |> EffectHandler.run program
         printfn "Log: %A" log
         printfn "Name: %s" name
         0

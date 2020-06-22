@@ -5,19 +5,18 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open AlgEff.Effect
 open AlgEff.Handler
 
-type PureConsoleLogContext<'res>(input) as this =
+type PureConsoleLogContext<'res>(consoleInput) as this =
     inherit ConcreteContext<'res>()
 
     let handler =
-        let consoleHandler = this |> ConsoleHandler.createPure input
+        let consoleHandler = this |> ConsoleHandler.createPure consoleInput
         let logHandler = this |> LogHandler.createPure
         EffectHandler.combine consoleHandler logHandler
     
     interface ConsoleContext
     interface LogContext
 
-    member __.Run(program) =
-        handler |> EffectHandler.run program
+    member __.Handler = handler
 
 [<TestClass>]
 type TestClass () =
@@ -35,7 +34,8 @@ type TestClass () =
             }
 
         let name, (console, log) =
-            program |> PureConsoleLogContext(["John"]).Run
+            PureConsoleLogContext(["John"]).Handler
+                |> EffectHandler.run program
         Assert.AreEqual("John", name)
         Assert.AreEqual(List.empty<string>, console.Input)
         Assert.AreEqual(["What is your name?"; "John"; "Hello John"], console.Output)
