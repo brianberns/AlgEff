@@ -1,4 +1,4 @@
-﻿namespace AlgEff
+﻿namespace AlgEff.Effect
 
 /// An individual effectful operation, such as writing to a console.
 /// The type parameter is used to chain effects together.
@@ -8,7 +8,8 @@ type Effect<'a>() =
     /// Maps a function over this effect.
     abstract member Map : ('a -> 'b) -> Effect<'b>
 
-/// A chain of effects (a.k.a. "free monad").
+/// A chain of effects (a.k.a. "free monad") that requires a particular
+/// context type ('ctx) and returns a particular result type ('res).
 type EffectChain<'ctx, 'res> =
 
     /// One link in a chain of effects.
@@ -19,7 +20,7 @@ type EffectChain<'ctx, 'res> =
 
 module EffectChain =
 
-    /// Binds two effect chains together using the same context.
+    /// Binds two effect chains together in the same context.
     let rec bind (f : _ -> EffectChain<'ctx, _>) (chain : EffectChain<'ctx, _>) =
         match chain with
             | Free effect ->
@@ -29,8 +30,8 @@ module EffectChain =
 /// Effect chain builder.
 type EffectChainBuilder() =
     member __.Bind(chain, f) = EffectChain.bind f chain
-    member __.Return(x) = Pure x
-    member __.ReturnFrom(x) = x
+    member __.Return(value) = Pure value
+    member __.ReturnFrom(value) = value
     member __.Zero() = Pure ()
 
 [<AutoOpen>]

@@ -1,5 +1,8 @@
 namespace AlgEff
 
+open AlgEff.Effect
+open AlgEff.Handler
+
 type ProgramContext<'res>(consoleInput) as this =
     inherit ConcreteContext<'res>()
 

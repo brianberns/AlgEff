@@ -1,53 +1,6 @@
-﻿namespace AlgEff
+﻿namespace AlgEff.Handler
 
-/// Base console effect type.
-[<AbstractClass>]
-type ConsoleEff<'next>() =
-    inherit Effect<'next>()
-
-    abstract member Case : ConsoleEffSum<'next>
-
-and WriteLineEff<'next>(str : string, cont : unit -> 'next) =
-    inherit ConsoleEff<'next>()
-
-    override __.Map(f) =
-        WriteLineEff(str, cont >> f) :> _
-
-    override this.Case = WriteLine this
-
-    member __.String = str
-
-    member __.Cont = cont
-
-and ReadLineEff<'next>(cont : string -> 'next) =
-    inherit ConsoleEff<'next>()
-
-    override __.Map(f) =
-        ReadLineEff(cont >> f) :> _
-
-    override this.Case = ReadLine this
-
-    member __.Cont = cont
-
-/// Sum type for console effects.
-and ConsoleEffSum<'next> =
-    | WriteLine of WriteLineEff<'next>
-    | ReadLine of ReadLineEff<'next>
-
-/// Console context.
-type ConsoleContext = interface end
-
-module Console =
-
-    let writeln<'ctx when 'ctx :> ConsoleContext> str : EffectChain<'ctx, _> =
-        Free (WriteLineEff(str, Pure))
-
-    let writelnf fmt = Printf.ksprintf writeln fmt
-
-    let readln<'ctx when 'ctx :> ConsoleContext> : EffectChain<'ctx, _> =
-        Free (ReadLineEff(Pure))
-
-(* Handler *)
+open AlgEff.Effect
 
 type ConsoleHandler<'next, 'state> =
     EffectHandler<ConsoleEff<'next>, 'next, 'state, 'state>
