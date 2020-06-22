@@ -18,11 +18,20 @@ type PureConsoleLogContext<'res>(consoleInput) as this =
 
     member __.Handler = handler
 
+type PureStateContext<'state, 'res>(initial : 'state) as this =
+    inherit ConcreteContext<'res>()
+
+    let handler = this |> StateHandler.createPure initial
+    
+    interface StateContext
+
+    member __.Handler = handler
+
 [<TestClass>]
 type TestClass () =
 
     [<TestMethod>]
-    member __.Greet () =
+    member __.Greet() =
 
         let program =
             effect {
@@ -40,3 +49,20 @@ type TestClass () =
         Assert.AreEqual(List.empty<string>, console.Input)
         Assert.AreEqual(["What is your name?"; "John"; "Hello John"], console.Output)
         Assert.AreEqual(["Name is John"], log)
+
+    [<TestMethod>]
+    member __.State() =
+
+        let program =
+            effect {
+                let! x = State.get
+                do! State.put (x + 1)
+                let! y = State.get
+                do! State.put (y + y)
+                return! State.get
+            }
+
+        let state =
+            PureStateContext(1).Handler
+                |> EffectHandler.run program
+        printfn "%A" state

@@ -24,7 +24,7 @@ module ConsoleHandler =
 
         let start = ConsoleState.create input []
 
-        let step (state, (consoleEff : ConsoleEff<EffectChain<'ctx, 'res>>)) =
+        let step (state, (consoleEff : ConsoleEffect<EffectChain<'ctx, 'res>>)) =
             match consoleEff.Case with
                 | WriteLine eff ->
                     let state' =
@@ -50,7 +50,7 @@ module ConsoleHandler =
     let createActual<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> ConcreteContext<'res>>
         (_ : 'ctx) =
 
-        let step ((), (consoleEff : ConsoleEff<EffectChain<'ctx, 'res>>)) =
+        let step ((), (consoleEff : ConsoleEffect<EffectChain<'ctx, 'res>>)) =
             let next =
                 match consoleEff.Case with
                     | WriteLine eff ->
