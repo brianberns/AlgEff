@@ -24,9 +24,7 @@ module NonDetHandler =
                     let next =
                         effect {
                             let! xt = eff.Cont(true)
-                            printfn "xt: %A" xt
                             let! xf = eff.Cont(false)
-                            printfn "xf: %A" xf
                             return max xt xf
                         }
                     (), next
