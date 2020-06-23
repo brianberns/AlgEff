@@ -3,20 +3,31 @@
 open AlgEff.Effect
 
 /// Generic effect handler.
-type EffectHandler<'effect, 'next, 'state, 'finish when 'effect :> Effect<'next>> =
+type EffectHandler<'next, 'state, 'finish> =
     {
         /// Handler's initial state.
         Start : 'state
 
         /// Handles a single effect in the given state, answering the updated state
         /// and the next effect.
-        Step : ('state * 'effect) -> ('state * 'next)
+        Step : ('state * Effect<'next>) -> Option<'state * 'next>
 
         /// Transforms the handler's final state.
         Finish : 'state -> 'finish
     }
 
 module EffectHandler =
+
+    /// Uses reflection to convert the given step function for use
+    /// in an effect handler.
+    let toStep<'effect, 'next, 'state when 'effect :> Effect<'next>>
+        (step : ('state * 'effect) -> ('state * 'next)) =
+
+        fun (state : 'state, effect : Effect<'next>) ->
+            match effect with
+                | :? 'effect as typedEffect ->
+                    step (state, typedEffect) |> Some
+                | _ -> None
 
     /// Creates an effect handler.
     let create start step finish =
@@ -25,6 +36,10 @@ module EffectHandler =
             Step = step
             Finish = finish
         }
+
+    /// Creates an effect handler by adapting the given step function.
+    let adapt state step finish =
+        create state (toStep step) finish
 
     /// Maps a function over an effect handler.
     let map f handler =
@@ -36,8 +51,9 @@ module EffectHandler =
         /// Runs a single step in the program.
         let rec loop state = function
             | Free effect ->
-                let state', next = handler.Step(state, effect)
-                loop state' next
+                match handler.Step(state, effect) with
+                    | Some (state', next) -> loop state' next
+                    | None -> failwithf "Unhandled effect: %A" effect
             | Pure result ->
                 state, result
 
@@ -45,23 +61,18 @@ module EffectHandler =
         result, handler.Finish(state)
 
     /// Combines two effect handlers.
-    let combine
-        (handler1 : EffectHandler<'effect1, 'next, _, _>)
-        (handler2 : EffectHandler<'effect2, 'next, _, _>)
-        : EffectHandler<Effect<'next>, 'next, _, _> =
+    let combine handler1 handler2 =
 
         let start = handler1.Start, handler2.Start
 
-            // this is the only point at which reflection is necessary
-        let step ((state1, state2), (effect : Effect<'next>)) =
-            match effect with
-                | :? 'effect1 as effect1 ->
-                    let state1', next = handler1.Step(state1, effect1)
-                    (state1', state2), next
-                | :? 'effect2 as effect2 ->
-                    let state2', next = handler2.Step(state2, effect2)
-                    (state1, state2'), next
-                | _ -> failwithf "Unhandled effect: %A" effect
+        let step ((state1, state2), effect) =
+            handler1.Step(state1, effect)
+                |> Option.map (fun (state1', result) ->
+                    (state1', state2), result)
+                |> Option.orElseWith (fun () ->
+                    handler2.Step(state2, effect)
+                        |> Option.map (fun (state2', result) ->
+                            (state1, state2'), result))
 
         let finish (state1, state2) =
             handler1.Finish state1, handler2.Finish state2

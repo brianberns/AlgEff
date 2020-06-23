@@ -12,4 +12,4 @@ module LogHandler =
             let next = logEff.Cont()
             state, next
 
-        EffectHandler.create [] step List.rev
+        EffectHandler.adapt [] step List.rev

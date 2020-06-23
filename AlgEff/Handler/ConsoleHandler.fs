@@ -44,7 +44,7 @@ module ConsoleHandler =
         let finish state =
             { state with Output = state.Output |> List.rev }
 
-        EffectHandler.create start step finish
+        EffectHandler.adapt start step finish
 
     /// Actual console handler.
     let createActual<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> ConcreteContext<'res>>
@@ -61,4 +61,4 @@ module ConsoleHandler =
                         eff.Cont(str)
             (), next
 
-        EffectHandler.create () step id
+        EffectHandler.adapt () step id

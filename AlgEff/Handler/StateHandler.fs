@@ -20,4 +20,4 @@ module StateHandler =
                     let next = eff.Cont(state)
                     state, next
 
-        EffectHandler.create start step id
+        EffectHandler.adapt start step id

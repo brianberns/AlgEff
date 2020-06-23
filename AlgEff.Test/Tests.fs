@@ -25,7 +25,7 @@ type PureStateContext<'res>(initial : int) as this =
     
     interface StateContext
 
-    member __.Handler = EffectHandler.combine handler handler
+    member __.Handler = handler
 
 [<TestClass>]
 type TestClass () =
@@ -64,5 +64,6 @@ type TestClass () =
             }
 
         let state =
-            EffectHandler.run program (PureStateContext(1).Handler)
+            PureStateContext(1).Handler
+                |> EffectHandler.run program
         printfn "%A" state
