@@ -45,14 +45,14 @@ and StateEffectSum<'state, 'next> =
     | Get of GetEffect<'state, 'next>
 
 /// State context requirement.
-type StateContext = interface end
+type StateContext<'state> = interface end
 
 module State =
 
     /// Sets the current state
-    let put<'state, 'ctx when 'ctx :> StateContext> (value : 'state) : EffectChain<'ctx, _> =
+    let put<'state, 'ctx when 'ctx :> StateContext<'state>> (value : 'state) : EffectChain<'ctx, _> =
         Free (PutEffect(value, Pure))
 
     /// Gets the current state
-    let get<'state, 'ctx when 'ctx :> StateContext> : EffectChain<'ctx, 'state> =
+    let get<'state, 'ctx when 'ctx :> StateContext<'state>> : EffectChain<'ctx, 'state> =
         Free (GetEffect(Pure))

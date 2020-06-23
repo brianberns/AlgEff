@@ -5,7 +5,7 @@ open AlgEff.Effect
 module StateHandler =
 
     /// Pure state handler.
-    let createPure<'state, 'ctx, 'res when 'ctx :> StateContext and 'ctx :> ConcreteContext<'res>>
+    let createPure<'state, 'ctx, 'res when 'ctx :> StateContext<'state> and 'ctx :> ConcreteContext<'res>>
         (initial : 'state) (_ : 'ctx) =
 
         let start = initial
