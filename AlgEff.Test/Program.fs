@@ -3,30 +3,35 @@ namespace AlgEff
 open AlgEff.Effect
 open AlgEff.Handler
 
-type NonDetConcreteContext<'res>(getHandler) as this =
+type ProgramContext<'res>() as this =
     inherit ConcreteContext<'res>()
-    
-    let handler = this |> getHandler
 
-    interface NonDetContext
+    let handler =
+        let consoleHandler = this |> ConsoleHandler.createActual
+        let logHandler = this |> LogHandler.createPure
+        EffectHandler.combine consoleHandler logHandler
+    
+    interface ConsoleContext
+    interface LogContext
 
     member __.Handler = handler
 
 module Program =
 
     let program =
-        (*
-        NonDet.choose 15 30 >>= (fun x1 ->
-            NonDet.choose 5 10 >>= (fun x2 ->
-                Pure (x1 - x2)))
-        *)
         effect {
-            let! x1 = NonDet.choose 15 30
-            let! x2 = NonDet.choose 5 10
-            return x1 - x2
+            do! Console.writeln "What is your name?"
+            let! name = Console.readln
+            do! Console.writelnf "Hello %s" name
+            do! Log.writef "Name is %s" name
+            return name
         }
 
-    let result, () =
-        NonDetConcreteContext(NonDetHandler.pickMax).Handler
-            |> EffectHandler.run program
-    printfn "%A" result
+    [<EntryPoint>]
+    let main argv =
+        let name, ((), log) =
+            ProgramContext().Handler
+                |> EffectHandler.run program
+        printfn "Log: %A" log
+        printfn "Name: %s" name
+        0

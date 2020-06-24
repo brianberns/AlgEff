@@ -91,7 +91,9 @@ type TestClass () =
                 |> EffectHandler.run program
         Assert.AreEqual(10, result)
 
+        (*
         let result, () =
             NonDetConcreteContext(NonDetHandler.pickMax).Handler
                 |> EffectHandler.run program
         Assert.AreEqual(25, result)
+        *)
