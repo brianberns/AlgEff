@@ -52,8 +52,7 @@ type TestClass () =
             }
 
         let name, (console, log) =
-            PureConsoleLogContext(["John"]).Handler
-                |> EffectHandler.run program
+            PureConsoleLogContext(["John"]).Handler.Run(program)
         Assert.AreEqual("John", name)
         Assert.AreEqual(List.empty<string>, console.Input)
         Assert.AreEqual(["What is your name?"; "John"; "Hello John"], console.Output)
@@ -72,8 +71,7 @@ type TestClass () =
             }
 
         let state =
-            PureStateContext(1).Handler
-                |> EffectHandler.run program
+            PureStateContext(1).Handler.Run(program)
         printfn "%A" state
 
     [<TestMethod>]
@@ -87,8 +85,7 @@ type TestClass () =
             }
 
         let result, () =
-            NonDetConcreteContext(NonDetHandler.pickTrue).Handler
-                |> EffectHandler.run program
+            NonDetConcreteContext(NonDetHandler.pickTrue).Handler.Run(program)
         Assert.AreEqual(10, result)
 
         (*

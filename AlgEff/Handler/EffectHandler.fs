@@ -3,28 +3,47 @@
 open AlgEff.Effect
 
 /// Generic effect handler.
-type EffectHandler<'next, 'state, 'finish> =
-    {
-        /// Handler's initial state.
-        Start : 'state
+[<AbstractClass>]
+type EffectHandlerBase<'next, 'state, 'finish>() =
 
-        /// Attempts to handle a single effect in the given state,
-        /// answering the updated state and the next effect if
-        /// successful.
-        TryStep : ('state * Effect<'next>) -> Option<'state * 'next>
+    /// Handler's initial state.
+    abstract member Start : 'state
 
-        /// Transforms the handler's final state.
-        Finish : 'state -> 'finish
-    }
+    /// Attempts to handle a single effect in the given state,
+    /// answering the updated state and the next effect if
+    /// successful.
+    abstract member TryStep : 'state * Effect<'next> -> Option<'state * 'next>
+
+    /// Transforms the handler's final state.
+    abstract member Finish : 'state -> 'finish
+
+[<AbstractClass>]
+type EffectHandler<'ctx, 'res, 'state, 'finish>() =
+    inherit EffectHandlerBase<EffectChain<'ctx, 'res>, 'state, 'finish>()
+
+    /// Runs the given program.
+    member this.Run(program) =
+
+        /// Runs a single step in the program.
+        let rec loop state = function
+            | Free (effect : Effect<EffectChain<'ctx, 'res>>) ->
+                match this.TryStep(state, effect) with
+                    | Some (state', next) -> loop state' next
+                    | None -> failwithf "Unhandled effect: %A" effect
+            | Pure result ->
+                state, result
+
+        let state, result = loop this.Start program
+        result, this.Finish(state)
 
 module EffectHandler =
 
-    /// Creates an effect handler.
-    let create start step finish =
+    let create start tryStep finish =
         {
-            Start = start
-            TryStep = step
-            Finish = finish
+            new EffectHandler<'ctx, 'res, 'state, 'finish>() with
+                member __.Start = start
+                member __.TryStep(state, effect) = tryStep (state, effect)
+                member __.Finish(state) = finish state
         }
 
     /// Creates an effect handler by adapting the given step function.
@@ -32,37 +51,25 @@ module EffectHandler =
 
         let tryStep step (state, effect : Effect<'next>) =
             match effect with
-                | :? 'effect as typedEffect ->
+                | :? #Effect<'next> as typedEffect ->
                     step (state, typedEffect) |> Some
                 | _ -> None
 
         create state (tryStep step) finish
 
     /// Maps a function over an effect handler.
-    let map f handler =
-        create handler.Start handler.TryStep (handler.Finish >> f)
-
-    /// Runs the given program using the given handler.
-    let run program handler =
-
-        /// Runs a single step in the program.
-        let rec loop state = function
-            | Free effect ->
-                match handler.TryStep(state, effect) with
-                    | Some (state', next) -> loop state' next
-                    | None -> failwithf "Unhandled effect: %A" effect
-            | Pure result ->
-                state, result
-
-        let state, result = loop handler.Start program
-        result, handler.Finish(state)
+    let map f (handler : EffectHandler<_, _, _, _>) =
+        create
+            handler.Start
+            handler.TryStep
+            (handler.Finish >> f)
 
     /// Combines two effect handlers.
-    let combine handler1 handler2 =
+    let combine (handler1 : EffectHandler<'ctx, 'res, 'state1, 'finish1>) (handler2 : EffectHandler<'ctx, 'res, 'state2, 'finish2>) =
 
         let start = handler1.Start, handler2.Start
 
-        let step ((state1, state2), effect) =
+        let tryStep ((state1, state2), effect) =
             handler1.TryStep(state1, effect)
                 |> Option.map (fun (state1', result) ->
                     (state1', state2), result)
@@ -72,9 +79,9 @@ module EffectHandler =
                             (state1, state2'), result))
 
         let finish (state1, state2) =
-            handler1.Finish state1, handler2.Finish state2
+            handler1.Finish(state1), handler2.Finish(state2)
 
-        create start step finish
+        create start tryStep finish
 
     /// Appends a handler.
     let private add a b = combine b a

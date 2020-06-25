@@ -30,8 +30,7 @@ module Program =
     [<EntryPoint>]
     let main argv =
         let name, ((), log) =
-            ProgramContext().Handler
-                |> EffectHandler.run program
+            ProgramContext().Handler.Run(program)
         printfn "Log: %A" log
         printfn "Name: %s" name
         0
