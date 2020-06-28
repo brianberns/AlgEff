@@ -27,16 +27,14 @@ type PureStateContext<'state, 'res>(initial : 'state) as this =
 
     member __.Handler = handler
 
-(*
-type NonDetConcreteContext<'res>(getHandler) as this =
+type PickTrueConcreteContext<'res>() as this =
     inherit ConcreteContext<'res>()
     
-    let handler = this |> getHandler
+    let handler = PickTrue(this)
 
     interface NonDetContext
 
     member __.Handler = handler
-*)
 
 [<TestClass>]
 type TestClass () =
@@ -76,7 +74,6 @@ type TestClass () =
             PureStateContext(1).Handler.Run(program)
         printfn "%A" state
 
-    (*
     [<TestMethod>]
     member __.NonDet() =
 
@@ -87,8 +84,8 @@ type TestClass () =
                 return x1 - x2
             }
 
-        let result, () =
-            NonDetConcreteContext(NonDetHandler.pickTrue).Handler.Run(program)
+        let result, _ =
+            PickTrueConcreteContext().Handler.Run(program)
         Assert.AreEqual(10, result)
 
         (*
@@ -97,4 +94,3 @@ type TestClass () =
                 |> EffectHandler.run program
         Assert.AreEqual(25, result)
         *)
-*)
