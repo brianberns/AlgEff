@@ -21,20 +21,23 @@ type PickTrue<'ctx, 'res when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<
 
     override __.Finish(dummy) = dummy
 
-    (*
-    let pickMax<'ctx, 'res when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'res> and 'res : comparison>
-        (_ : 'ctx) =
+    type PickMax<'ctx, 'res when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'res> and 'res : comparison>(context : 'ctx) =
+        inherit EffectHandler<'ctx, 'res, Dummy, Dummy>()
 
-        let step ((), (nonDetEff : NonDetEffect<EffectChain<'ctx, 'res>>)) =
-            match nonDetEff.Case with
-                | Decide eff ->
-                    let next =
-                        effect {
-                            let! xt = eff.Cont(true)
-                            let! xf = eff.Cont(false)
-                            return max xt xf
-                        }
-                    (), next
+        override __.Start = Dummy
 
-        EffectHandler.adapt () step id
-    *)
+        override __.TryStep(_, effect, cont) =
+            match effect with
+                | :? NonDetEffect<EffectChain<'ctx, 'res>> as nonDetEff ->
+                    match nonDetEff.Case with
+                        | Decide eff ->
+                            let outStateT, resT = eff.Cont(true) |> cont Dummy
+                            let outStateF, resF = eff.Cont(false) |> cont Dummy
+                            if resT > resF then
+                                outStateT, resT
+                            else
+                                outStateF, resF
+                        |> Some
+                | _ -> None
+
+        override __.Finish(dummy) = dummy

@@ -36,6 +36,15 @@ type PickTrueConcreteContext<'res>() as this =
 
     member __.Handler = handler
 
+type PickMaxConcreteContext<'res when 'res : comparison>() as this =
+    inherit ConcreteContext<'res>()
+    
+    let handler = PickMax(this)
+
+    interface NonDetContext
+
+    member __.Handler = handler
+
 [<TestClass>]
 type TestClass () =
 
@@ -77,20 +86,17 @@ type TestClass () =
     [<TestMethod>]
     member __.NonDet() =
 
-        let program =
+        let program () =
             effect {
                 let! x1 = NonDet.choose 15 30
                 let! x2 = NonDet.choose 5 10
                 return x1 - x2
             }
 
-        let result, _ =
-            PickTrueConcreteContext().Handler.Run(program)
-        Assert.AreEqual(10, result)
+        let resultA, _ =
+            program () |> PickTrueConcreteContext().Handler.Run
+        Assert.AreEqual(10, resultA)
 
-        (*
-        let result, () =
-            NonDetConcreteContext(NonDetHandler.pickMax).Handler
-                |> EffectHandler.run program
-        Assert.AreEqual(25, result)
-        *)
+        let resultB, _ =
+            program () |> PickMaxConcreteContext().Handler.Run
+        Assert.AreEqual(25, resultB)
