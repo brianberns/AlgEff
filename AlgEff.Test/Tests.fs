@@ -5,14 +5,13 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open AlgEff.Effect
 open AlgEff.Handler
 
-(*
 type PureConsoleLogContext<'res>(consoleInput) as this =
     inherit ConcreteContext<'res>()
 
     let handler =
-        let consoleHandler = this |> ConsoleHandler.createPure consoleInput
-        let logHandler = this |> LogHandler.createPure
-        EffectHandler.combine consoleHandler logHandler
+        let consoleHandler = PureConsoleHandler(consoleInput, this)
+        let logHandler = PureLogHandler(this)
+        CombinedEffectHandler(consoleHandler, logHandler)
     
     interface ConsoleContext
     interface LogContext
@@ -22,12 +21,13 @@ type PureConsoleLogContext<'res>(consoleInput) as this =
 type PureStateContext<'state, 'res>(initial : 'state) as this =
     inherit ConcreteContext<'res>()
 
-    let handler = this |> StateHandler.createPure initial
+    let handler = PureStateHandler(initial, this)
     
     interface StateContext<'state>
 
     member __.Handler = handler
 
+(*
 type NonDetConcreteContext<'res>(getHandler) as this =
     inherit ConcreteContext<'res>()
     
@@ -36,6 +36,7 @@ type NonDetConcreteContext<'res>(getHandler) as this =
     interface NonDetContext
 
     member __.Handler = handler
+*)
 
 [<TestClass>]
 type TestClass () =
@@ -75,6 +76,7 @@ type TestClass () =
             PureStateContext(1).Handler.Run(program)
         printfn "%A" state
 
+    (*
     [<TestMethod>]
     member __.NonDet() =
 

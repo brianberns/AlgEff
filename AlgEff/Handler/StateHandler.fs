@@ -2,26 +2,24 @@
 
 open AlgEff.Effect
 
-module StateHandler =
+/// Pure state handler.
+type PureStateHandler<'state, 'ctx, 'res when 'ctx :> StateContext<'state> and 'ctx :> ConcreteContext<'res>>(initial : 'state, context : 'ctx) =
+    inherit EffectHandler<'ctx, 'res, 'state, 'state>()
 
-    do ()
+    override __.Start = initial
 
-    (*
-    /// Pure state handler.
-    let createPure<'state, 'ctx, 'res when 'ctx :> StateContext<'state> and 'ctx :> ConcreteContext<'res>>
-        (initial : 'state) (_ : 'ctx) =
+    override __.TryStep(state, effect, cont) =
+        match effect with
+            | :? StateEffect<'state, EffectChain<'ctx, 'res>> as stateEff ->
+                match stateEff.Case with
+                    | Put eff ->
+                        let state' = eff.Value
+                        let next = eff.Cont()
+                        cont state' next
+                    | Get eff ->
+                        let next = eff.Cont(state)
+                        cont state next
+                    |> Some
+            | _ -> None
 
-        let start = initial
-
-        let step (state, (stateEff : StateEffect<'state, EffectChain<'ctx, 'res>>)) =
-            match stateEff.Case with
-                | Put eff ->
-                    let state' = eff.Value
-                    let next = eff.Cont()
-                    state', next
-                | Get eff ->
-                    let next = eff.Cont(state)
-                    state, next
-
-        EffectHandler.adapt start step id
-    *)
+    override __.Finish(state) = state
