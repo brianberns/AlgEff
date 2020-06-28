@@ -48,13 +48,11 @@ type CombinedEffectHandler<'ctx, 'res, 'state1, 'finish1, 'state2, 'finish2>
     override __.Start = handler1.Start, handler2.Start
 
     override __.TryStep<'outState>((state1, state2), effect, cont : EffectHandlerCont<_, _, _, 'outState>) =
-        let cont1 state1' chain =
-            cont (state1', state2) chain
-        let cont2 state2' chain =
-            cont (state1, state2') chain
-        handler1.TryStep(state1, effect, cont1)
+        handler1.TryStep(state1, effect, fun state1' chain ->
+            cont (state1', state2) chain)
             |> Option.orElseWith (fun () ->
-                handler2.TryStep(state2, effect, cont2))
+                handler2.TryStep(state2, effect, fun state2' chain ->
+                    cont (state1, state2') chain))
 
     override __.Finish((state1, state2)) =
         handler1.Finish(state1), handler2.Finish(state2)
