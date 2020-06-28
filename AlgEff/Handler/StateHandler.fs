@@ -4,6 +4,9 @@ open AlgEff.Effect
 
 module StateHandler =
 
+    do ()
+
+    (*
     /// Pure state handler.
     let createPure<'state, 'ctx, 'res when 'ctx :> StateContext<'state> and 'ctx :> ConcreteContext<'res>>
         (initial : 'state) (_ : 'ctx) =
@@ -21,3 +24,4 @@ module StateHandler =
                     state, next
 
         EffectHandler.adapt start step id
+    *)

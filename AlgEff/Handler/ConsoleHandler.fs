@@ -16,36 +16,37 @@ module ConsoleState =
             Output = output
         }
 
-module ConsoleHandler =
+/// Pure console handler.
+type PureConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> ConcreteContext<'res>>(input, context : 'ctx) =
+    inherit EffectHandler<'ctx, 'res, ConsoleState, ConsoleState>()
 
-    /// Pure console handler.
-    let createPure<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> ConcreteContext<'res>>
-        input (_ : 'ctx) =
+    override __.Start = ConsoleState.create input []
 
-        let start = ConsoleState.create input []
+    override __.TryStep(state, effect, cont) =
+        match effect with
+            | :? ConsoleEffect<EffectChain<'ctx, 'res>> as consoleEff ->
+                match consoleEff.Case with
+                    | WriteLine eff ->
+                        let state' =
+                            { state with Output = eff.String :: state.Output }
+                        let next = eff.Cont()
+                        cont state' next
+                    | ReadLine eff ->
+                        match state.Input with
+                            | head :: tail ->
+                                let state' =
+                                    let output = head :: state.Output
+                                    ConsoleState.create tail output
+                                let next = eff.Cont(head)
+                                cont state' next
+                            | _ -> failwith "No more input"
+                    |> Some
+            | _ -> None
 
-        let step (state, (consoleEff : ConsoleEffect<EffectChain<'ctx, 'res>>)) =
-            match consoleEff.Case with
-                | WriteLine eff ->
-                    let state' =
-                        { state with Output = eff.String :: state.Output }
-                    let next = eff.Cont()
-                    state', next
-                | ReadLine eff ->
-                    match state.Input with
-                        | head :: tail ->
-                            let state' =
-                                let output = head :: state.Output
-                                ConsoleState.create tail output
-                            let next = eff.Cont(head)
-                            state', next
-                        | _ -> failwith "No more input"
-
-        let finish state =
+    override __.Finish(state) =
             { state with Output = state.Output |> List.rev }
 
-        EffectHandler.adapt start step finish
-
+(*
     /// Actual console handler.
     let createActual<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> ConcreteContext<'res>>
         (_ : 'ctx) =
@@ -62,3 +63,4 @@ module ConsoleHandler =
             (), next
 
         EffectHandler.adapt () step id
+*)

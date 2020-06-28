@@ -5,6 +5,7 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open AlgEff.Effect
 open AlgEff.Handler
 
+(*
 type PureConsoleLogContext<'res>(consoleInput) as this =
     inherit ConcreteContext<'res>()
 
@@ -94,3 +95,4 @@ type TestClass () =
                 |> EffectHandler.run program
         Assert.AreEqual(25, result)
         *)
+*)

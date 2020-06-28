@@ -2,14 +2,18 @@
 
 open AlgEff.Effect
 
-module LogHandler =
+/// Pure log handler.
+type PureLogHandler<'ctx, 'res when 'ctx :> LogContext and 'ctx :> ConcreteContext<'res>>(context : 'ctx) =
+    inherit EffectHandler<'ctx, 'res, List<string>, List<string>>()
 
-    /// Pure log handler.
-    let createPure<'ctx, 'res when 'ctx :> LogContext and 'ctx :> ConcreteContext<'res>> (_ : 'ctx) =
+    override __.Start = []
 
-        let step (log, (logEff : LogEffect<EffectChain<'ctx, 'res>>)) =
-            let state = logEff.String :: log
-            let next = logEff.Cont()
-            state, next
+    override __.TryStep(log, effect, cont) =
+        match effect with
+            | :? LogEffect<EffectChain<'ctx, 'res>> as logEff ->
+                let state = logEff.String :: log
+                let next = logEff.Cont()
+                cont state next |> Some
+            | _ -> None
 
-        EffectHandler.adapt [] step List.rev
+    override __.Finish(log) = List.rev log

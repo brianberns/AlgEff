@@ -7,9 +7,9 @@ type ProgramContext<'res>() as this =
     inherit ConcreteContext<'res>()
 
     let handler =
-        let consoleHandler = this |> ConsoleHandler.createActual
-        let logHandler = this |> LogHandler.createPure
-        EffectHandler.combine consoleHandler logHandler
+        let consoleHandler = PureConsoleHandler(["John"], this)
+        let logHandler = PureLogHandler(this)
+        CombinedEffectHandler(consoleHandler, logHandler)
     
     interface ConsoleContext
     interface LogContext
@@ -29,8 +29,9 @@ module Program =
 
     [<EntryPoint>]
     let main argv =
-        let name, ((), log) =
+        let name, (console, log) =
             ProgramContext().Handler.Run(program)
+        printfn "Console: %A" console
         printfn "Log: %A" log
         printfn "Name: %s" name
         0

@@ -4,6 +4,9 @@ open AlgEff.Effect
 
 module NonDetHandler =
 
+    do ()
+
+    (*
     let pickTrue<'ctx, 'res when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'res>>
         (_ : 'ctx) =
 
@@ -30,3 +33,4 @@ module NonDetHandler =
                     (), next
 
         EffectHandler.adapt () step id
+    *)
