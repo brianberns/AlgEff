@@ -76,12 +76,14 @@ type TestClass () =
                 do! State.put (x + 1)
                 let! y = State.get
                 do! State.put (y + y)
-                return! State.get
+                let! z = State.get
+                return z.ToString()
             }
 
-        let state =
+        let result, state =
             PureStateContext(1).Handler.Run(program)
-        printfn "%A" state
+        Assert.AreEqual("4", result)
+        Assert.AreEqual(4, state)
 
     [<TestMethod>]
     member __.NonDet() =
