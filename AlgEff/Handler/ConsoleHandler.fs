@@ -44,7 +44,7 @@ type PureConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> Concr
         this.Adapt<_, 'outState> step state effect cont
 
     override __.Finish(state) =
-            { state with Output = state.Output |> List.rev }
+        { state with Output = state.Output |> List.rev }
 
 /// Actual console handler.
 type ActualConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> ConcreteContext<'res>>(context : 'ctx) =
