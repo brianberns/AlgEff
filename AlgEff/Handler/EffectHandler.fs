@@ -21,6 +21,15 @@ type EffectHandler<'ctx, 'res, 'state, 'finish>() =
     /// Transforms the handler's final state.
     abstract member Finish : 'state -> 'finish
 
+    /// Adapts a step function for use in an effect handler.
+    member __.Adapt<'effect, 'outState when 'effect :> Effect<EffectChain<'ctx, 'res>>>
+        (step : 'state -> 'effect -> EffectHandlerCont<'ctx, 'res, 'state, 'outState> -> ('outState * 'res)) =
+        fun state (effect : Effect<_>) cont ->
+            match effect with
+                | :? 'effect as eff ->
+                    step state eff cont |> Some
+                | _ -> None
+
     /// Runs the given program.
     member this.Run(program) =
 
@@ -61,3 +70,5 @@ type CombinedEffectHandler<'ctx, 'res, 'state1, 'finish1, 'state2, 'finish2>
 /// requirement.
 [<AbstractClass>]
 type ConcreteContext<'res>() = class end
+
+type Dummy = Dummy   // unit doesn't work

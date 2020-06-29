@@ -2,8 +2,6 @@
 
 open AlgEff.Effect
 
-type Dummy = Dummy   // unit doesn't work
-
 type PickTrue<'ctx, 'res when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'res>>(context : 'ctx) =
     inherit EffectHandler<'ctx, 'res, Dummy, Dummy>()
 

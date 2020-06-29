@@ -8,18 +8,18 @@ type PureStateHandler<'state, 'ctx, 'res when 'ctx :> StateContext<'state> and '
 
     override __.Start = initial
 
-    override __.TryStep(state, effect, cont) =
-        match effect with
-            | :? StateEffect<'state, EffectChain<'ctx, 'res>> as stateEff ->
-                match stateEff.Case with
-                    | Put eff ->
-                        let state' = eff.Value
-                        let next = eff.Cont()
-                        cont state' next
-                    | Get eff ->
-                        let next = eff.Cont(state)
-                        cont state next
-                    |> Some
-            | _ -> None
+    override this.TryStep(state, effect, cont) =
+
+        let step state (stateEff : StateEffect<'state, EffectChain<'ctx, 'res>>) cont =
+            match stateEff.Case with
+                | Put eff ->
+                    let state' = eff.Value
+                    let next = eff.Cont()
+                    cont state' next
+                | Get eff ->
+                    let next = eff.Cont(state)
+                    cont state next
+
+        this.Adapt<_, 'outState> step state effect cont
 
     override __.Finish(state) = state

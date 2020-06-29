@@ -22,45 +22,50 @@ type PureConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> Concr
 
     override __.Start = ConsoleState.create input []
 
-    override __.TryStep(state, effect, cont) =
-        match effect with
-            | :? ConsoleEffect<EffectChain<'ctx, 'res>> as consoleEff ->
-                match consoleEff.Case with
-                    | WriteLine eff ->
-                        let state' =
-                            { state with Output = eff.String :: state.Output }
-                        let next = eff.Cont()
-                        cont state' next
-                    | ReadLine eff ->
-                        match state.Input with
-                            | head :: tail ->
-                                let state' =
-                                    let output = head :: state.Output
-                                    ConsoleState.create tail output
-                                let next = eff.Cont(head)
-                                cont state' next
-                            | _ -> failwith "No more input"
-                    |> Some
-            | _ -> None
+    override this.TryStep(state, effect, cont) =
+
+        let step state (consoleEff : ConsoleEffect<EffectChain<'ctx, 'res>>) cont =
+            match consoleEff.Case with
+                | WriteLine eff ->
+                    let state' =
+                        { state with Output = eff.String :: state.Output }
+                    let next = eff.Cont()
+                    cont state' next
+                | ReadLine eff ->
+                    match state.Input with
+                        | head :: tail ->
+                            let state' =
+                                let output = head :: state.Output
+                                ConsoleState.create tail output
+                            let next = eff.Cont(head)
+                            cont state' next
+                        | _ -> failwith "No more input"
+
+        this.Adapt<_, 'outState> step state effect cont
 
     override __.Finish(state) =
             { state with Output = state.Output |> List.rev }
 
-(*
-    /// Actual console handler.
-    let createActual<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> ConcreteContext<'res>>
-        (_ : 'ctx) =
+/// Actual console handler.
+type ActualConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> ConcreteContext<'res>>(context : 'ctx) =
+    inherit EffectHandler<'ctx, 'res, Dummy, Dummy>()
 
-        let step ((), (consoleEff : ConsoleEffect<EffectChain<'ctx, 'res>>)) =
-            let next =
-                match consoleEff.Case with
-                    | WriteLine eff ->
-                        System.Console.WriteLine(eff.String)
-                        eff.Cont()
-                    | ReadLine eff ->
-                        let str = System.Console.ReadLine()
-                        eff.Cont(str)
-            (), next
+    override __.Start = Dummy
 
-        EffectHandler.adapt () step id
-*)
+    override this.TryStep(state, effect, cont) =
+
+        let step Dummy (consoleEff : ConsoleEffect<EffectChain<'ctx, 'res>>) cont =
+            match consoleEff.Case with
+                | WriteLine eff ->
+                    System.Console.WriteLine(eff.String)
+                    let next = eff.Cont()
+                    cont Dummy next
+                | ReadLine eff ->
+                    let str = System.Console.ReadLine()
+                    let next = eff.Cont(str)
+                    cont Dummy next
+
+        this.Adapt<_, 'outState> step state effect cont
+
+    override __.Finish(Dummy) =
+        Dummy

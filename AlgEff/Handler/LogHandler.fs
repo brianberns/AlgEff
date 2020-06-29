@@ -8,12 +8,13 @@ type PureLogHandler<'ctx, 'res when 'ctx :> LogContext and 'ctx :> ConcreteConte
 
     override __.Start = []
 
-    override __.TryStep(log, effect, cont) =
-        match effect with
-            | :? LogEffect<EffectChain<'ctx, 'res>> as logEff ->
-                let state = logEff.String :: log
-                let next = logEff.Cont()
-                cont state next |> Some
-            | _ -> None
+    override this.TryStep<'outState>(log, effect, cont) =
+
+        let step log (logEff : LogEffect<EffectChain<'ctx, 'res>>) cont =
+            let state = logEff.String :: log
+            let next = logEff.Cont()
+            cont state next
+
+        this.Adapt<_, 'outState> step log effect cont
 
     override __.Finish(log) = List.rev log
