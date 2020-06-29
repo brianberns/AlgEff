@@ -10,7 +10,7 @@ type PureStateHandler<'state, 'ctx, 'res when 'ctx :> StateContext<'state> and '
 
     override this.TryStep(state, effect, cont) =
 
-        let step state (stateEff : StateEffect<'state, EffectChain<'ctx, 'res>>) cont =
+        let step state (stateEff : StateEffect<_, _>) cont =
             match stateEff.Case with
                 | Put eff ->
                     let state' = eff.Value

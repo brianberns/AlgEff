@@ -24,7 +24,7 @@ type PureConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> Concr
 
     override this.TryStep(state, effect, cont) =
 
-        let step state (consoleEff : ConsoleEffect<EffectChain<'ctx, 'res>>) cont =
+        let step state (consoleEff : ConsoleEffect<_>) cont =
             match consoleEff.Case with
                 | WriteLine eff ->
                     let state' =
@@ -54,7 +54,7 @@ type ActualConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> Con
 
     override this.TryStep(state, effect, cont) =
 
-        let step Dummy (consoleEff : ConsoleEffect<EffectChain<'ctx, 'res>>) cont =
+        let step Dummy (consoleEff : ConsoleEffect<_>) cont =
             match consoleEff.Case with
                 | WriteLine eff ->
                     System.Console.WriteLine(eff.String)

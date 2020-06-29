@@ -10,7 +10,7 @@ type PureLogHandler<'ctx, 'res when 'ctx :> LogContext and 'ctx :> ConcreteConte
 
     override this.TryStep<'outState>(log, effect, cont) =
 
-        let step log (logEff : LogEffect<EffectChain<'ctx, 'res>>) cont =
+        let step log (logEff : LogEffect<_>) cont =
             let state = logEff.String :: log
             let next = logEff.Cont()
             cont state next
