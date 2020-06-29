@@ -17,7 +17,7 @@
     <Compile Include="Effect\ConsoleEffect.fs" />
     <Compile Include="Effect\StateEffect.fs" />
     <Compile Include="Effect\NonDetEffect.fs" />
-    <Compile Include="Handler\EffectHandler.fs" />
+    <Compile Include="Handler\Handler.fs" />
     <Compile Include="Handler\LogHandler.fs" />
     <Compile Include="Handler\ConsoleHandler.fs" />
     <Compile Include="Handler\StateHandler.fs" />

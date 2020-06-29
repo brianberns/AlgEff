@@ -18,7 +18,7 @@ module ConsoleState =
 
 /// Pure console handler.
 type PureConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> ConcreteContext<'res>>(input, context : 'ctx) =
-    inherit EffectHandler<'ctx, 'res, ConsoleState, ConsoleState>()
+    inherit Handler<'ctx, 'res, ConsoleState, ConsoleState>()
 
     override __.Start = ConsoleState.create input []
 
@@ -48,24 +48,24 @@ type PureConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> Concr
 
 /// Actual console handler.
 type ActualConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> ConcreteContext<'res>>(context : 'ctx) =
-    inherit EffectHandler<'ctx, 'res, Dummy, Dummy>()
+    inherit Handler<'ctx, 'res, Unit, Unit>()
 
-    override __.Start = Dummy
+    override __.Start = Unit
 
     override this.TryStep(state, effect, cont) =
 
-        let step Dummy (consoleEff : ConsoleEffect<_>) cont =
+        let step Unit (consoleEff : ConsoleEffect<_>) cont =
             match consoleEff.Case with
                 | WriteLine eff ->
                     System.Console.WriteLine(eff.String)
                     let next = eff.Cont()
-                    cont Dummy next
+                    cont Unit next
                 | ReadLine eff ->
                     let str = System.Console.ReadLine()
                     let next = eff.Cont(str)
-                    cont Dummy next
+                    cont Unit next
 
         this.Adapt<_, 'outState> step state effect cont
 
-    override __.Finish(Dummy) =
-        Dummy
+    override __.Finish(Unit) =
+        Unit

@@ -50,9 +50,9 @@ type StateContext<'state> = interface end
 module State =
 
     /// Sets the current state
-    let put<'state, 'ctx when 'ctx :> StateContext<'state>> (value : 'state) : EffectChain<'ctx, _> =
+    let put<'state, 'ctx when 'ctx :> StateContext<'state>> (value : 'state) : Program<'ctx, _> =
         Free (PutEffect(value, Pure))
 
     /// Gets the current state
-    let get<'state, 'ctx when 'ctx :> StateContext<'state>> : EffectChain<'ctx, 'state> =
+    let get<'state, 'ctx when 'ctx :> StateContext<'state>> : Program<'ctx, 'state> =
         Free (GetEffect(Pure))

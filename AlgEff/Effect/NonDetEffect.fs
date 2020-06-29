@@ -30,7 +30,7 @@ type NonDetContext = interface end
 
 module NonDet =
 
-    let decide<'ctx when 'ctx :> NonDetContext> : EffectChain<'ctx, _> =
+    let decide<'ctx when 'ctx :> NonDetContext> : Program<'ctx, _> =
         Free (DecideEffect(Pure))
 
     let choose x y =

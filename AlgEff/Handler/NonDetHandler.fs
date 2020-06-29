@@ -3,34 +3,34 @@
 open AlgEff.Effect
 
 type PickTrue<'ctx, 'res when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'res>>(context : 'ctx) =
-    inherit EffectHandler<'ctx, 'res, Dummy, Dummy>()
+    inherit Handler<'ctx, 'res, Unit, Unit>()
 
-    override __.Start = Dummy
+    override __.Start = Unit
 
     override __.TryStep(_, effect, cont) =
         match effect with
-            | :? NonDetEffect<EffectChain<'ctx, 'res>> as nonDetEff ->
+            | :? NonDetEffect<Program<'ctx, 'res>> as nonDetEff ->
                 match nonDetEff.Case with
                     | Decide eff ->
                         let next = eff.Cont(true)
-                        cont Dummy next
+                        cont Unit next
                     |> Some
             | _ -> None
 
-    override __.Finish(Dummy) = Dummy
+    override __.Finish(Unit) = Unit
 
 type PickMax<'ctx, 'res when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'res> and 'res : comparison>(context : 'ctx) =
-    inherit EffectHandler<'ctx, 'res, Dummy, Dummy>()
+    inherit Handler<'ctx, 'res, Unit, Unit>()
 
-    override __.Start = Dummy
+    override __.Start = Unit
 
     override __.TryStep(_, effect, cont) =
         match effect with
-            | :? NonDetEffect<EffectChain<'ctx, 'res>> as nonDetEff ->
+            | :? NonDetEffect<Program<'ctx, 'res>> as nonDetEff ->
                 match nonDetEff.Case with
                     | Decide eff ->
-                        let outStateT, resT = eff.Cont(true) |> cont Dummy
-                        let outStateF, resF = eff.Cont(false) |> cont Dummy
+                        let outStateT, resT = eff.Cont(true) |> cont Unit
+                        let outStateF, resF = eff.Cont(false) |> cont Unit
                         if resT > resF then
                             outStateT, resT
                         else
@@ -38,4 +38,4 @@ type PickMax<'ctx, 'res when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'
                     |> Some
             | _ -> None
 
-    override __.Finish(Dummy) = Dummy
+    override __.Finish(Unit) = Unit

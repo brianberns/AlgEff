@@ -4,7 +4,7 @@ open AlgEff.Effect
 
 /// Pure log handler.
 type PureLogHandler<'ctx, 'res when 'ctx :> LogContext and 'ctx :> ConcreteContext<'res>>(context : 'ctx) =
-    inherit EffectHandler<'ctx, 'res, List<string>, List<string>>()
+    inherit Handler<'ctx, 'res, List<string>, List<string>>()
 
     override __.Start = []
 

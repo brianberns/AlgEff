@@ -1,6 +1,6 @@
 ﻿namespace AlgEff.Effect
 
-/// An individual effectful operation, such as writing to a console.
+/// An individual effectful operation (e.g. writing to a console).
 /// The type parameter is used to chain effects together.
 [<AbstractClass>]
 type Effect<'a>() =
@@ -10,32 +10,32 @@ type Effect<'a>() =
 
 /// A chain of effects (a.k.a. "free monad") that requires a particular
 /// context type ('ctx) and returns a particular result type ('res).
-type EffectChain<'ctx, 'res> =
+type Program<'ctx, 'res> =
 
-    /// One link in a chain of effects.
-    | Free of Effect<EffectChain<'ctx, 'res>>
+    /// One step in a program.
+    | Free of Effect<Program<'ctx, 'res>>
 
-    /// Last link in a chain of effects.
+    /// Last step in a program.
     | Pure of 'res
 
-module EffectChain =
+module Program =
 
-    /// Binds two effect chains together in the same context.
-    let rec bind (f : _ -> EffectChain<'ctx, _>) (chain : EffectChain<'ctx, _>) =
-        match chain with
+    /// Binds two programs together in the same context.
+    let rec bind (f : _ -> Program<'ctx, _>) (program : Program<'ctx, _>) =
+        match program with
             | Free effect ->
                 effect.Map(bind f) |> Free
             | Pure x -> f x
 
-/// Effect chain builder.
-type EffectChainBuilder() =
-    member __.Bind(chain, f) = EffectChain.bind f chain
+/// Program builder.
+type ProgramBuilder() =
+    member __.Bind(chain, f) = Program.bind f chain
     member __.Return(value) = Pure value
     member __.ReturnFrom(value) = value
     member __.Zero() = Pure ()
 
 [<AutoOpen>]
-module AutoOpen =
+module ProgramBuilder =
 
-    /// Effect chain builder.
-    let effect = EffectChainBuilder()
+    /// Program builder.
+    let effect = ProgramBuilder()

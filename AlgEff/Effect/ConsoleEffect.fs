@@ -50,12 +50,12 @@ type ConsoleContext = interface end
 module Console =
 
     /// Writes the given line to the console.
-    let writeln<'ctx when 'ctx :> ConsoleContext> str : EffectChain<'ctx, _> =
+    let writeln<'ctx when 'ctx :> ConsoleContext> str : Program<'ctx, _> =
         Free (WriteLineEffect(str, Pure))
 
     /// Formats and writes a line to the console.
     let writelnf fmt = Printf.ksprintf writeln fmt
 
     /// Reads a line from the console.
-    let readln<'ctx when 'ctx :> ConsoleContext> : EffectChain<'ctx, _> =
+    let readln<'ctx when 'ctx :> ConsoleContext> : Program<'ctx, _> =
         Free (ReadLineEffect(Pure))

@@ -20,7 +20,7 @@ type LogContext = interface end
 module Log =
 
     /// Logs the given string.
-    let write<'ctx when 'ctx :> LogContext> str : EffectChain<'ctx, _> =
+    let write<'ctx when 'ctx :> LogContext> str : Program<'ctx, _> =
         Free (LogEffect(str, Pure))
 
     /// Formats and logs a string.

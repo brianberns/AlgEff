@@ -7,9 +7,9 @@ type ProgramContext<'res>() as this =
     inherit ConcreteContext<'res>()
 
     let handler =
-        let consoleHandler = ActualConsoleHandler(this)
-        let logHandler = PureLogHandler(this)
-        CombinedEffectHandler(consoleHandler, logHandler)
+        Handler.combine2
+            (ActualConsoleHandler(this))
+            (PureLogHandler(this))
     
     interface ConsoleContext
     interface LogContext
