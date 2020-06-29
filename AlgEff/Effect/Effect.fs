@@ -13,10 +13,13 @@ type Effect<'a>() =
 type Program<'ctx, 'res> =
 
     /// One step in a program.
-    | Free of Effect<Program<'ctx, 'res>>
+    | Free of Effect<'ctx, 'res>
 
     /// Last step in a program.
     | Pure of 'res
+
+/// An effect in a program.
+and Effect<'ctx, 'res> = Effect<Program<'ctx, 'res>>
 
 module Program =
 

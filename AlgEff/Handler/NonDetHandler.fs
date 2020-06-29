@@ -7,15 +7,15 @@ type PickTrue<'ctx, 'res when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<
 
     override __.Start = Unit
 
-    override __.TryStep(_, effect, cont) =
-        match effect with
-            | :? NonDetEffect<Program<'ctx, 'res>> as nonDetEff ->
-                match nonDetEff.Case with
-                    | Decide eff ->
-                        let next = eff.Cont(true)
-                        cont Unit next
-                    |> Some
-            | _ -> None
+    override this.TryStep<'outState>(Unit, effect, cont) =
+
+        let step Unit (nonDetEff : NonDetEffect<_>) cont =
+            match nonDetEff.Case with
+                | Decide eff ->
+                    let next = eff.Cont(true)
+                    cont Unit next
+
+        this.Adapt<_, 'outState> step Unit effect cont
 
     override __.Finish(Unit) = Unit
 
@@ -24,18 +24,18 @@ type PickMax<'ctx, 'res when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'
 
     override __.Start = Unit
 
-    override __.TryStep(_, effect, cont) =
-        match effect with
-            | :? NonDetEffect<Program<'ctx, 'res>> as nonDetEff ->
-                match nonDetEff.Case with
-                    | Decide eff ->
-                        let outStateT, resT = eff.Cont(true) |> cont Unit
-                        let outStateF, resF = eff.Cont(false) |> cont Unit
-                        if resT > resF then
-                            outStateT, resT
-                        else
-                            outStateF, resF
-                    |> Some
-            | _ -> None
+    override this.TryStep(_, effect, cont) =
+
+        let step Unit (nonDetEff : NonDetEffect<_>) cont =
+            match nonDetEff.Case with
+                | Decide eff ->
+                    let outStateT, resT = eff.Cont(true) |> cont Unit
+                    let outStateF, resF = eff.Cont(false) |> cont Unit
+                    if resT > resF then
+                        outStateT, resT
+                    else
+                        outStateF, resF
+
+        this.Adapt<_, 'outState> step Unit effect cont
 
     override __.Finish(Unit) = Unit

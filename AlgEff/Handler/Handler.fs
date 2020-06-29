@@ -18,7 +18,7 @@ type Handler<'ctx, 'res, 'state, 'finish>() =
     /// successful.
     abstract member TryStep<'outState> :
         'state
-            * Effect<Program<'ctx, 'res>>
+            * Effect<'ctx, 'res>
             * HandlerCont<'ctx, 'res, 'state, 'outState>
             -> Option<'outState * 'res>
 
@@ -26,7 +26,7 @@ type Handler<'ctx, 'res, 'state, 'finish>() =
     abstract member Finish : 'state -> 'finish
 
     /// Adapts a step function for use in an effect handler.
-    member __.Adapt<'effect, 'outState when 'effect :> Effect<Program<'ctx, 'res>>>
+    member __.Adapt<'effect, 'outState when 'effect :> Effect<'ctx, 'res>>
         (step : 'state -> 'effect -> HandlerCont<'ctx, 'res, 'state, 'outState> -> ('outState * 'res)) =
         fun state (effect : Effect<_>) cont ->
             match effect with

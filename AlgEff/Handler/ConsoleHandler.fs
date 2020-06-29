@@ -67,5 +67,4 @@ type ActualConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> Con
 
         this.Adapt<_, 'outState> step state effect cont
 
-    override __.Finish(Unit) =
-        Unit
+    override __.Finish(Unit) = Unit
