@@ -41,7 +41,7 @@ type PureConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> Concr
                             cont state' next
                         | _ -> failwith "No more input"
 
-        this.Adapt<_, 'outState> step state effect cont
+        this.Adapt<_, 'stx> step state effect cont
 
     override __.Finish(state) =
         { state with Output = state.Output |> List.rev }
@@ -65,6 +65,6 @@ type ActualConsoleHandler<'ctx, 'res when 'ctx :> ConsoleContext and 'ctx :> Con
                     let next = eff.Cont(str)
                     cont Unit next
 
-        this.Adapt<_, 'outState> step state effect cont
+        this.Adapt<_, 'stx> step state effect cont
 
     override __.Finish(Unit) = Unit

@@ -7,7 +7,7 @@ type PickTrue<'ctx, 'res when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<
 
     override __.Start = Unit
 
-    override this.TryStep<'outState>(Unit, effect, cont) =
+    override this.TryStep<'stx>(Unit, effect, cont) =
 
         let step Unit (nonDetEff : NonDetEffect<_>) cont =
             match nonDetEff.Case with
@@ -15,7 +15,7 @@ type PickTrue<'ctx, 'res when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<
                     let next = eff.Cont(true)
                     cont Unit next
 
-        this.Adapt<_, 'outState> step Unit effect cont
+        this.Adapt<_, 'stx> step Unit effect cont
 
     override __.Finish(Unit) = Unit
 
@@ -36,6 +36,6 @@ type PickMax<'ctx, 'res when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'
                     else
                         outStateF, resF
 
-        this.Adapt<_, 'outState> step Unit effect cont
+        this.Adapt<_, 'stx> step Unit effect cont
 
     override __.Finish(Unit) = Unit

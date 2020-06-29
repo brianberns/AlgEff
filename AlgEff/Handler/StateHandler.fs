@@ -20,6 +20,6 @@ type PureStateHandler<'state, 'ctx, 'res when 'ctx :> StateContext<'state> and '
                     let next = eff.Cont(state)
                     cont state next
 
-        this.Adapt<_, 'outState> step state effect cont
+        this.Adapt<_, 'stx> step state effect cont
 
     override __.Finish(state) = state

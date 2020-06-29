@@ -5,29 +5,30 @@ open AlgEff.Effect
 /// Effect handler base class.
 /// 'ctx: Context type requirement satisfied by this handler.
 /// 'res: Result type of program handled by this handler.
-/// 'state: Internal state type maintained by this handler.
-/// 'finish: Final state type produced by this handler.
+/// 'st:  Internal state type maintained by this handler.
+/// 'fin: Final state type produced by this handler. (This is
+///       typically, but not necessarily, the same as 'st.)
 [<AbstractClass>]
-type Handler<'ctx, 'res, 'state, 'finish>() =
+type Handler<'ctx, 'res, 'st, 'fin>() =
 
     /// Handler's initial state.
-    abstract member Start : 'state
+    abstract member Start : 'st
 
-    /// Attempts to handle a single effect in the given state,
-    /// answering the updated state and the next effect if
-    /// successful.
-    abstract member TryStep<'outState> :
-        'state
-            * Effect<'ctx, 'res>
-            * HandlerCont<'ctx, 'res, 'state, 'outState>
-            -> Option<'outState * 'res>
+    /// Attempts to handle a single effect in a progam.
+    /// 'stx: State answered by the continuation, which may be
+    ///       different from the state managed by this handler.
+    abstract member TryStep<'stx> :
+        'st                                        // state before handling current effect
+            * Effect<'ctx, 'res>                   // effect to be handled
+            * HandlerCont<'ctx, 'res, 'st, 'stx>   // continuation that will handle the remainder of the program
+            -> Option<'stx * 'res>                 // "Some" indicates the effect was handled
 
     /// Transforms the handler's final state.
-    abstract member Finish : 'state -> 'finish
+    abstract member Finish : 'st -> 'fin
 
     /// Adapts a step function for use in an effect handler.
-    member __.Adapt<'effect, 'outState when 'effect :> Effect<'ctx, 'res>>
-        (step : 'state -> 'effect -> HandlerCont<'ctx, 'res, 'state, 'outState> -> ('outState * 'res)) =
+    member __.Adapt<'effect, 'stx when 'effect :> Effect<'ctx, 'res>>
+        (step : 'st -> 'effect -> HandlerCont<'ctx, 'res, 'st, 'stx> -> ('stx * 'res)) =
         fun state (effect : Effect<_>) cont ->
             match effect with
                 | :? 'effect as eff ->
@@ -49,22 +50,25 @@ type Handler<'ctx, 'res, 'state, 'finish>() =
         let state, result = loop this.Start program
         result, this.Finish(state)
 
-and HandlerCont<'ctx, 'res, 'state, 'outState> =
-    'state -> Program<'ctx, 'res> -> ('outState * 'res)
+/// Continuation thant handles the remainder of a program.
+and HandlerCont<'ctx, 'res, 'st, 'stx> =
+    'st                          // state after handling current effect
+        -> Program<'ctx, 'res>   // remainder of the program to handle
+        -> ('stx * 'res)         // output of handling the program
 
 /// Combines two effect handlers using the given finish.
-type private CombinedHandler<'ctx, 'res, 'state1, 'finish1, 'state2, 'finish2, 'finish>
-    (handler1 : Handler<'ctx, 'res, 'state1, 'finish1>,
-    handler2 : Handler<'ctx, 'res, 'state2, 'finish2>,
-    finish : ('finish1 * 'finish2) -> 'finish) =
-    inherit Handler<'ctx, 'res, 'state1 * 'state2, 'finish>()
+type private CombinedHandler<'ctx, 'res, 'st1, 'fin1, 'st2, 'fin2, 'fin>
+    (handler1 : Handler<'ctx, 'res, 'st1, 'fin1>,
+    handler2 : Handler<'ctx, 'res, 'st2, 'fin2>,
+    finish : ('fin1 * 'fin2) -> 'fin) =
+    inherit Handler<'ctx, 'res, 'st1 * 'st2, 'fin>()
 
     /// Combined initial state.
     override __.Start = handler1.Start, handler2.Start
 
     /// Attempts to handle a single effect by routing it first to one handler,
     /// and then to the other.
-    override __.TryStep<'outState>((state1, state2), effect, cont : HandlerCont<_, _, _, 'outState>) =
+    override __.TryStep<'stx>((state1, state2), effect, cont : HandlerCont<_, _, _, 'stx>) =
         handler1.TryStep(state1, effect, fun state1' chain ->
             cont (state1', state2) chain)
             |> Option.orElseWith (fun () ->
