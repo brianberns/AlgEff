@@ -52,8 +52,10 @@ type PickAll<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'
                 | Decide eff ->
                     let stxT, resT = eff.Cont(true) |> cont Unit
                     let stxF, resF = eff.Cont(false) |> cont Unit
-                    Unit, List.append resT resF
+                    stxT, List.append resT resF
 
         this.Adapt<_, 'stx> step Unit effect cont
+
+    override __.ToResult(ret) = [ ret ]
 
     override __.Finish(Unit) = Unit
