@@ -50,7 +50,7 @@ type Handler<'ctx, 'ret, 'st, 'fin>() =
         let state, result = loop this.Start program
         result, this.Finish(state)
 
-/// Continuation thant handles the remainder of a program.
+/// Continuation that handles the remainder of a program.
 and HandlerCont<'ctx, 'ret, 'st, 'stx> =
     'st                          // state after handling current effect
         -> Program<'ctx, 'ret>   // remainder of the program to handle
