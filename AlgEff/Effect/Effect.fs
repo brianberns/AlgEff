@@ -32,7 +32,7 @@ module Program =
 
 /// Program builder.
 type ProgramBuilder() =
-    member __.Bind(chain, f) = Program.bind f chain
+    member __.Bind(program, f) = Program.bind f program
     member __.Return(value) = Pure value
     member __.ReturnFrom(value) = value
     member __.Zero() = Pure ()
