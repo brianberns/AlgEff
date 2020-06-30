@@ -27,11 +27,11 @@ type Handler<'ctx, 'ret, 'st, 'fin>() =
     abstract member Finish : 'st -> 'fin
 
     /// Adapts a step function for use in an effect handler.
-    member __.Adapt<'effect, 'stx when 'effect :> Effect<'ctx, 'ret>>
-        (step : 'st -> 'effect -> HandlerCont<'ctx, 'ret, 'st, 'stx> -> ('stx * 'ret)) =
+    member __.Adapt<'eff, 'stx when 'eff :> Effect<'ctx, 'ret>>
+        (step : 'st -> 'eff -> HandlerCont<'ctx, 'ret, 'st, 'stx> -> ('stx * 'ret)) =
         fun state (effect : Effect<_>) cont ->
             match effect with
-                | :? 'effect as eff ->
+                | :? 'eff as eff ->
                     step state eff cont |> Some
                 | _ -> None
 
