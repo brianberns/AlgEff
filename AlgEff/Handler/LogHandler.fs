@@ -4,16 +4,16 @@ open AlgEff.Effect
 
 /// Pure log handler.
 type PureLogHandler<'ctx, 'ret when 'ctx :> LogContext and 'ctx :> ConcreteContext<'ret>>(context : 'ctx) =
-    inherit Handler<'ctx, 'ret, List<string>, List<string>>()
+    inherit SimpleHandler<'ctx, 'ret, List<string>, List<string>>()
 
     override __.Start = []
 
     override this.TryStep<'stx>(log, effect, cont) =
 
         let step log (logEff : LogEffect<_>) cont =
-            let state = logEff.String :: log
+            let log' = logEff.String :: log
             let next = logEff.Cont()
-            cont state next
+            cont log' next
 
         this.Adapt<_, 'stx> step log effect cont
 

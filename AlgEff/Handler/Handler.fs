@@ -9,7 +9,7 @@ open AlgEff.Effect
 /// 'fin: Final state type produced by this handler. (This is
 ///       typically, but not necessarily, the same as 'st.)
 [<AbstractClass>]
-type Handler<'ctx, 'ret, 'st, 'fin>() =
+type Handler<'ctx, 'ret, 'res, 'st, 'fin>() =
 
     /// Handler's initial state.
     abstract member Start : 'st
@@ -20,15 +20,17 @@ type Handler<'ctx, 'ret, 'st, 'fin>() =
     abstract member TryStep<'stx> :
         'st                                        // state before handling current effect
             * Effect<'ctx, 'ret>                   // effect to be handled
-            * HandlerCont<'ctx, 'ret, 'st, 'stx>   // continuation that will handle the remainder of the program
-            -> Option<'stx * 'ret>                 // "Some" indicates the effect was handled
+            * HandlerCont<'ctx, 'ret, 'res, 'st, 'stx>   // continuation that will handle the remainder of the program
+            -> Option<'stx * 'res>                 // "Some" indicates the effect was handled
+
+    abstract member ToResult : 'ret -> 'res
 
     /// Transforms the handler's final state.
     abstract member Finish : 'st -> 'fin
 
     /// Adapts a step function for use in an effect handler.
     member __.Adapt<'eff, 'stx when 'eff :> Effect<'ctx, 'ret>>
-        (step : 'st -> 'eff -> HandlerCont<'ctx, 'ret, 'st, 'stx> -> ('stx * 'ret)) =
+        (step : 'st -> 'eff -> HandlerCont<'ctx, 'ret, 'res, 'st, 'stx> -> ('stx * 'res)) =
         fun state (effect : Effect<_>) cont ->
             match effect with
                 | :? 'eff as eff ->
@@ -41,39 +43,50 @@ type Handler<'ctx, 'ret, 'st, 'fin>() =
         /// Runs a single step in the program.
         let rec loop state = function
             | Free effect ->
-                match this.TryStep(state, effect, loop) with
-                    | Some (state', result) -> state', result
-                    | None -> failwithf "Unhandled effect: %A" effect
-            | Pure result ->
-                state, result
+                this.TryStep(state, effect, loop)
+                    |> Option.defaultWith (fun () ->
+                        failwithf "Unhandled effect: %A" effect)
+            | Pure ret ->
+                state, this.ToResult(ret)
 
         let state, result = loop this.Start program
         result, this.Finish(state)
 
 /// Continuation that handles the remainder of a program.
-and HandlerCont<'ctx, 'ret, 'st, 'stx> =
+and HandlerCont<'ctx, 'ret, 'res, 'st, 'stx> =
     'st                          // state after handling current effect
         -> Program<'ctx, 'ret>   // remainder of the program to handle
-        -> ('stx * 'ret)         // output of handling the program
+        -> ('stx * 'res)         // output of handling the program
+
+[<AbstractClass>]
+type SimpleHandler<'ctx, 'ret, 'st, 'fin>() =
+    inherit Handler<'ctx, 'ret, 'ret, 'st, 'fin>()
+
+    /// Adapts a step function for use in an effect handler.
+    member __.Adapt<'eff, 'stx when 'eff :> Effect<'ctx, 'ret>>
+        (step : 'st -> 'eff -> HandlerCont<'ctx, 'ret, 'ret, 'st, 'stx> -> ('stx * 'ret)) =
+        base.Adapt(step)
+
+    override __.ToResult(ret) = ret
 
 /// Combines two effect handlers using the given finish.
 type private CombinedHandler<'ctx, 'ret, 'st1, 'fin1, 'st2, 'fin2, 'fin>
-    (handler1 : Handler<'ctx, 'ret, 'st1, 'fin1>,
-    handler2 : Handler<'ctx, 'ret, 'st2, 'fin2>,
+    (handler1 : SimpleHandler<'ctx, 'ret, 'st1, 'fin1>,
+    handler2 : SimpleHandler<'ctx, 'ret, 'st2, 'fin2>,
     finish : ('fin1 * 'fin2) -> 'fin) =
-    inherit Handler<'ctx, 'ret, 'st1 * 'st2, 'fin>()
+    inherit SimpleHandler<'ctx, 'ret, 'st1 * 'st2, 'fin>()
 
     /// Combined initial state.
     override __.Start = handler1.Start, handler2.Start
 
     /// Attempts to handle a single effect by routing it first to one handler,
     /// and then to the other.
-    override __.TryStep<'stx>((state1, state2), effect, cont : HandlerCont<_, _, _, 'stx>) =
-        handler1.TryStep(state1, effect, fun state1' chain ->
-            cont (state1', state2) chain)
+    override __.TryStep<'stx>((state1, state2), effect, cont : HandlerCont<_, _, 'ret, _, 'stx>) =
+        handler1.TryStep(state1, effect, fun state1' program ->
+            cont (state1', state2) program)
             |> Option.orElseWith (fun () ->
-                handler2.TryStep(state2, effect, fun state2' chain ->
-                    cont (state1, state2') chain))
+                handler2.TryStep(state2, effect, fun state2' program ->
+                    cont (state1, state2') program))
 
     /// Combines the given handlers' final states.
     override __.Finish((state1, state2)) =
@@ -83,7 +96,7 @@ module Handler =
 
     /// Combines two handlers using the given finish.
     let private combine handler1 handler2 finish =
-        CombinedHandler(handler1, handler2, finish) :> Handler<_, _, _, _>
+        CombinedHandler(handler1, handler2, finish) :> SimpleHandler<_, _, _, _>
 
     /// Combines two handlers.
     let combine2 handler1 handler2 =

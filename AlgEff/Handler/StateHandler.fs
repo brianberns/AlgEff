@@ -4,7 +4,7 @@ open AlgEff.Effect
 
 /// Pure state handler.
 type PureStateHandler<'state, 'ctx, 'ret when 'ctx :> StateContext<'state> and 'ctx :> ConcreteContext<'ret>>(initial : 'state, context : 'ctx) =
-    inherit Handler<'ctx, 'ret, 'state, 'state>()
+    inherit SimpleHandler<'ctx, 'ret, 'state, 'state>()
 
     override __.Start = initial
 
