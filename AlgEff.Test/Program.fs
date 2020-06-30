@@ -3,8 +3,8 @@ namespace AlgEff
 open AlgEff.Effect
 open AlgEff.Handler
 
-type ProgramContext<'res>() as this =
-    inherit ConcreteContext<'res>()
+type ProgramContext<'ret>() as this =
+    inherit ConcreteContext<'ret>()
 
     let handler =
         Handler.combine2

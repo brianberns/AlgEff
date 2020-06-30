@@ -5,8 +5,8 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open AlgEff.Effect
 open AlgEff.Handler
 
-type GreetContext<'res>(consoleInput) as this =
-    inherit ConcreteContext<'res>()
+type GreetContext<'ret>(consoleInput) as this =
+    inherit ConcreteContext<'ret>()
 
     let handler =
         Handler.combine3
@@ -20,8 +20,8 @@ type GreetContext<'res>(consoleInput) as this =
 
     member __.Handler = handler
 
-type PureStateContext<'state, 'res>(initial : 'state) as this =
-    inherit ConcreteContext<'res>()
+type PureStateContext<'state, 'ret>(initial : 'state) as this =
+    inherit ConcreteContext<'ret>()
 
     let handler = PureStateHandler(initial, this)
     
@@ -29,8 +29,8 @@ type PureStateContext<'state, 'res>(initial : 'state) as this =
 
     member __.Handler = handler
 
-type PickTrueConcreteContext<'res>() as this =
-    inherit ConcreteContext<'res>()
+type PickTrueConcreteContext<'ret>() as this =
+    inherit ConcreteContext<'ret>()
     
     let handler = PickTrue(this)
 
@@ -38,8 +38,8 @@ type PickTrueConcreteContext<'res>() as this =
 
     member __.Handler = handler
 
-type PickMaxConcreteContext<'res when 'res : comparison>() as this =
-    inherit ConcreteContext<'res>()
+type PickMaxConcreteContext<'ret when 'ret : comparison>() as this =
+    inherit ConcreteContext<'ret>()
     
     let handler = PickMax(this)
 

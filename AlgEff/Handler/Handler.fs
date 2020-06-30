@@ -4,12 +4,12 @@ open AlgEff.Effect
 
 /// Effect handler base class.
 /// 'ctx: Context type requirement satisfied by this handler.
-/// 'res: Result type of program handled by this handler.
+/// 'ret: Return type of program handled by this handler.
 /// 'st:  Internal state type maintained by this handler.
 /// 'fin: Final state type produced by this handler. (This is
 ///       typically, but not necessarily, the same as 'st.)
 [<AbstractClass>]
-type Handler<'ctx, 'res, 'st, 'fin>() =
+type Handler<'ctx, 'ret, 'st, 'fin>() =
 
     /// Handler's initial state.
     abstract member Start : 'st
@@ -19,16 +19,16 @@ type Handler<'ctx, 'res, 'st, 'fin>() =
     ///       different from the state managed by this handler.
     abstract member TryStep<'stx> :
         'st                                        // state before handling current effect
-            * Effect<'ctx, 'res>                   // effect to be handled
-            * HandlerCont<'ctx, 'res, 'st, 'stx>   // continuation that will handle the remainder of the program
-            -> Option<'stx * 'res>                 // "Some" indicates the effect was handled
+            * Effect<'ctx, 'ret>                   // effect to be handled
+            * HandlerCont<'ctx, 'ret, 'st, 'stx>   // continuation that will handle the remainder of the program
+            -> Option<'stx * 'ret>                 // "Some" indicates the effect was handled
 
     /// Transforms the handler's final state.
     abstract member Finish : 'st -> 'fin
 
     /// Adapts a step function for use in an effect handler.
-    member __.Adapt<'effect, 'stx when 'effect :> Effect<'ctx, 'res>>
-        (step : 'st -> 'effect -> HandlerCont<'ctx, 'res, 'st, 'stx> -> ('stx * 'res)) =
+    member __.Adapt<'effect, 'stx when 'effect :> Effect<'ctx, 'ret>>
+        (step : 'st -> 'effect -> HandlerCont<'ctx, 'ret, 'st, 'stx> -> ('stx * 'ret)) =
         fun state (effect : Effect<_>) cont ->
             match effect with
                 | :? 'effect as eff ->
@@ -51,17 +51,17 @@ type Handler<'ctx, 'res, 'st, 'fin>() =
         result, this.Finish(state)
 
 /// Continuation thant handles the remainder of a program.
-and HandlerCont<'ctx, 'res, 'st, 'stx> =
+and HandlerCont<'ctx, 'ret, 'st, 'stx> =
     'st                          // state after handling current effect
-        -> Program<'ctx, 'res>   // remainder of the program to handle
-        -> ('stx * 'res)         // output of handling the program
+        -> Program<'ctx, 'ret>   // remainder of the program to handle
+        -> ('stx * 'ret)         // output of handling the program
 
 /// Combines two effect handlers using the given finish.
-type private CombinedHandler<'ctx, 'res, 'st1, 'fin1, 'st2, 'fin2, 'fin>
-    (handler1 : Handler<'ctx, 'res, 'st1, 'fin1>,
-    handler2 : Handler<'ctx, 'res, 'st2, 'fin2>,
+type private CombinedHandler<'ctx, 'ret, 'st1, 'fin1, 'st2, 'fin2, 'fin>
+    (handler1 : Handler<'ctx, 'ret, 'st1, 'fin1>,
+    handler2 : Handler<'ctx, 'ret, 'st2, 'fin2>,
     finish : ('fin1 * 'fin2) -> 'fin) =
-    inherit Handler<'ctx, 'res, 'st1 * 'st2, 'fin>()
+    inherit Handler<'ctx, 'ret, 'st1 * 'st2, 'fin>()
 
     /// Combined initial state.
     override __.Start = handler1.Start, handler2.Start
@@ -113,7 +113,7 @@ module Handler =
 /// A concrete context that satisfies an effect's context
 /// requirement.
 [<AbstractClass>]
-type ConcreteContext<'res>() = class end
+type ConcreteContext<'ret>() = class end
 
 /// Unit type replacement.
 /// https://stackoverflow.com/questions/47909938/passing-unit-as-type-parameter-to-generic-class-in-f

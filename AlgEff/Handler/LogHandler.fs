@@ -3,8 +3,8 @@
 open AlgEff.Effect
 
 /// Pure log handler.
-type PureLogHandler<'ctx, 'res when 'ctx :> LogContext and 'ctx :> ConcreteContext<'res>>(context : 'ctx) =
-    inherit Handler<'ctx, 'res, List<string>, List<string>>()
+type PureLogHandler<'ctx, 'ret when 'ctx :> LogContext and 'ctx :> ConcreteContext<'ret>>(context : 'ctx) =
+    inherit Handler<'ctx, 'ret, List<string>, List<string>>()
 
     override __.Start = []
 

@@ -9,17 +9,17 @@ type Effect<'a>() =
     abstract member Map : ('a -> 'b) -> Effect<'b>
 
 /// A chain of effects (a.k.a. "free monad") that requires a particular
-/// context type ('ctx) and returns a particular result type ('res).
-type Program<'ctx, 'res> =
+/// context type ('ctx) and returns a particular type ('ret).
+type Program<'ctx, 'ret> =
 
     /// One step in a program.
-    | Free of Effect<'ctx, 'res>
+    | Free of Effect<'ctx, 'ret>
 
     /// Last step in a program.
-    | Pure of 'res
+    | Pure of 'ret
 
 /// An effect in a program.
-and Effect<'ctx, 'res> = Effect<Program<'ctx, 'res>>
+and Effect<'ctx, 'ret> = Effect<Program<'ctx, 'ret>>
 
 module Program =
 

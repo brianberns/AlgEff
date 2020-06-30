@@ -2,8 +2,8 @@
 
 open AlgEff.Effect
 
-type PickTrue<'ctx, 'res when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'res>>(context : 'ctx) =
-    inherit Handler<'ctx, 'res, Unit, Unit>()
+type PickTrue<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'ret>>(context : 'ctx) =
+    inherit Handler<'ctx, 'ret, Unit, Unit>()
 
     override __.Start = Unit
 
@@ -19,8 +19,8 @@ type PickTrue<'ctx, 'res when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<
 
     override __.Finish(Unit) = Unit
 
-type PickMax<'ctx, 'res when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'res> and 'res : comparison>(context : 'ctx) =
-    inherit Handler<'ctx, 'res, Unit, Unit>()
+type PickMax<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'ret> and 'ret : comparison>(context : 'ctx) =
+    inherit Handler<'ctx, 'ret, Unit, Unit>()
 
     override __.Start = Unit
 
