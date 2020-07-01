@@ -1,6 +1,7 @@
 ﻿namespace AlgEff.Effect
 
 /// Base non-deterministic effect type.
+/// See https://www.eff-lang.org/handlers-tutorial.pdf, section 2.3.
 [<AbstractClass>]
 type NonDetEffect<'next>() =
     inherit Effect<'next>()
@@ -21,9 +22,23 @@ and DecideEffect<'next>(cont : bool -> 'next) =
     /// Continuation to next effect.
     member __.Cont = cont
 
+and FailEffect<'next>(cont : unit -> 'next) =
+    inherit NonDetEffect<'next>()
+
+    /// Maps a function over this effect.
+    override __.Map(f) =
+        FailEffect(cont >> f) :> _
+
+    /// Type-safe subtype enumeration.
+    override this.Case = Fail this
+
+    /// Continuation to next effect.
+    member __.Cont = cont
+
 /// Sum type for non-deterministic effects.
 and NonDetEffectSum<'next> =
     | Decide of DecideEffect<'next>
+    | Fail of FailEffect<'next>
 
 /// Non-deterministic context requirement.
 type NonDetContext = interface end
@@ -32,6 +47,9 @@ module NonDet =
 
     let decide<'ctx when 'ctx :> NonDetContext> : Program<'ctx, _> =
         Free (DecideEffect(Pure))
+
+    let fail<'ctx when 'ctx :> NonDetContext> : Program<'ctx, _> =
+        Free (FailEffect(Pure))
 
     let choose x y =
         effect {

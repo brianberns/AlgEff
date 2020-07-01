@@ -14,6 +14,7 @@ type PickTrue<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<
                 | Decide eff ->
                     let next = eff.Cont(true)
                     cont Unit next
+                | Fail _ -> []
 
         this.Adapt<_, 'stx> step Unit effect cont
 
@@ -35,6 +36,7 @@ type PickMax<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'
                         [ stxT, resT ]
                     else
                         [ stxF, resF ]
+                | Fail _ -> []
 
         this.Adapt<_, 'stx> step Unit effect cont
 
@@ -53,6 +55,7 @@ type PickAll<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'
                     let pairsT = eff.Cont(true) |> cont Unit
                     let pairsF = eff.Cont(false) |> cont Unit
                     List.append pairsT pairsF
+                | Fail _ -> []
 
         this.Adapt<_, 'stx> step Unit effect cont
 
