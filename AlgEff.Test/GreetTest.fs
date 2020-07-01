@@ -5,9 +5,9 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open AlgEff.Effect
 open AlgEff.Handler
 
-/// Context that provides console, log, and state handlers.
-type GreetContext<'ret>(consoleInput) as this =
-    inherit ContextSatisfier<'ret>()
+/// Environment that provides console, log, and state handlers.
+type GreetEnv<'ret>(consoleInput) as this =
+    inherit Environment<'ret>()
 
     let handler =
         Handler.combine3
@@ -40,7 +40,7 @@ type GreetTest() =
             }
 
         let result, (console, log, state) =
-            GreetContext(["John"]).Handler.Run(program)
+            GreetEnv(["John"]).Handler.Run(program)
         Assert.AreEqual(4, result)
         Assert.AreEqual(List.empty<string>, console.Input)
         Assert.AreEqual(["What is your name?"; "John"; "Hello John"], console.Output)

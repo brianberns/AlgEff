@@ -3,8 +3,8 @@
 open AlgEff.Effect
 
 /// Always picks the true choice.
-type PickTrue<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ContextSatisfier<'ret>>(context : 'ctx) =
-    inherit SimpleHandler<'ctx, 'ret, Unit>()
+type PickTrue<'env, 'ret when 'env :> NonDetContext and 'env :> Environment<'ret>>(env : 'env) =
+    inherit SimpleHandler<'env, 'ret, Unit>()
 
     override __.Start = Unit
 
@@ -20,8 +20,8 @@ type PickTrue<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ContextSatisfier
         this.Adapt<_, 'stx> step Unit effect cont
 
 /// Picks the choice with the maximum value.
-type PickMax<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ContextSatisfier<'ret> and 'ret : comparison>(context : 'ctx) =
-    inherit SimpleHandler<'ctx, 'ret, Unit>()
+type PickMax<'env, 'ret when 'env :> NonDetContext and 'env :> Environment<'ret> and 'ret : comparison>(env : 'env) =
+    inherit SimpleHandler<'env, 'ret, Unit>()
 
     override __.Start = Unit
 
@@ -39,8 +39,8 @@ type PickMax<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ContextSatisfier<
         this.Adapt<_, 'stx> step Unit effect cont
 
 /// Picks all the choices.
-type PickAll<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ContextSatisfier<'ret>>(context : 'ctx) =
-    inherit SimpleHandler<'ctx, 'ret, Unit>()
+type PickAll<'env, 'ret when 'env :> NonDetContext and 'env :> Environment<'ret>>(env : 'env) =
+    inherit SimpleHandler<'env, 'ret, Unit>()
 
     override __.Start = Unit
 

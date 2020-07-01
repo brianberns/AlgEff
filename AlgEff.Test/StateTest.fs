@@ -5,8 +5,8 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open AlgEff.Effect
 open AlgEff.Handler
 
-type PureStateContext<'state, 'ret>(initial : 'state) as this =
-    inherit ContextSatisfier<'ret>()
+type PureStateEnv<'state, 'ret>(initial : 'state) as this =
+    inherit Environment<'ret>()
 
     let handler = PureStateHandler(initial, this)
     
@@ -31,6 +31,6 @@ type StateTest() =
             }
 
         let result, state =
-            PureStateContext(1).Handler.Run(program)
+            PureStateEnv(1).Handler.Run(program)
         Assert.AreEqual("4", result)
         Assert.AreEqual(4, state)

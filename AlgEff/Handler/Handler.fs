@@ -125,7 +125,7 @@ module Handler =
 /// Base type for concrete classes that satisfy an effect type's context
 /// requirement.
 [<AbstractClass>]
-type ContextSatisfier<'ret>() = class end
+type Environment<'ret>() = class end
 
 /// Unit type replacement.
 /// https://stackoverflow.com/questions/47909938/passing-unit-as-type-parameter-to-generic-class-in-f

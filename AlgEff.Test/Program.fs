@@ -3,8 +3,8 @@ namespace AlgEff
 open AlgEff.Effect
 open AlgEff.Handler
 
-type ProgramContext<'ret>() as this =
-    inherit ContextSatisfier<'ret>()
+type ProgramEnv<'ret>() as this =
+    inherit Environment<'ret>()
 
     let handler =
         Handler.combine2
@@ -29,9 +29,8 @@ module Program =
 
     [<EntryPoint>]
     let main argv =
-        let name, (console, log) =
-            ProgramContext().Handler.Run(program)
-        printfn "Console: %A" console
+        let name, (Unit, log) =
+            ProgramEnv().Handler.Run(program)
         printfn "Log: %A" log
         printfn "Name: %s" name
         0

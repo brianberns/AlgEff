@@ -3,8 +3,8 @@
 open AlgEff.Effect
 
 /// Pure log handler.
-type PureLogHandler<'ctx, 'ret when 'ctx :> LogContext and 'ctx :> ContextSatisfier<'ret>>(context : 'ctx) =
-    inherit SimpleHandler<'ctx, 'ret, List<string>>()
+type PureLogHandler<'env, 'ret when 'env :> LogContext and 'env :> Environment<'ret>>(env : 'env) =
+    inherit SimpleHandler<'env, 'ret, List<string>>()
 
     /// Start with an empty log.
     override __.Start = []

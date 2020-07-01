@@ -5,8 +5,8 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open AlgEff.Effect
 open AlgEff.Handler
 
-type PickTrueLogContext<'ret>() as this =
-    inherit ContextSatisfier<'ret>()
+type PickTrueLogEnv<'ret>() as this =
+    inherit Environment<'ret>()
     
     let handler =
         Handler.combine2
@@ -18,8 +18,8 @@ type PickTrueLogContext<'ret>() as this =
 
     member __.Handler = handler
 
-type PickMaxLogContext<'ret when 'ret : comparison>() as this =
-    inherit ContextSatisfier<'ret>()
+type PickMaxLogEnv<'ret when 'ret : comparison>() as this =
+    inherit Environment<'ret>()
     
     let handler =
         Handler.combine2
@@ -31,8 +31,8 @@ type PickMaxLogContext<'ret when 'ret : comparison>() as this =
 
     member __.Handler = handler
 
-type PickAllLogContext<'ret>() as this =
-    inherit ContextSatisfier<'ret>()
+type PickAllLogEnv<'ret>() as this =
+    inherit Environment<'ret>()
     
     let handler =
         Handler.combine2
@@ -61,18 +61,18 @@ type NonDetTest() =
             }
 
         let resultA, (Unit, logA) =
-            program () |> PickTrueLogContext().Handler.Run
+            program () |> PickTrueLogEnv().Handler.Run
         Assert.AreEqual(10, resultA)
         Assert.AreEqual(["x1: 15"; "x2: 5"; "x1 - x2: 10"], logA)
 
         let resultB, (Unit, logB) =
-            program () |> PickMaxLogContext().Handler.Run
+            program () |> PickMaxLogEnv().Handler.Run
         Assert.AreEqual(25, resultB)
         Assert.AreEqual(["x1: 30"; "x2: 5"; "x1 - x2: 25"], logB)
 
         let resultC =
             program ()
-                |> PickAllLogContext().Handler.RunMany
+                |> PickAllLogEnv().Handler.RunMany
                 |> List.map fst
         Assert.AreEqual([10; 5; 25; 20], resultC)
 
@@ -110,7 +110,7 @@ type NonDetTest() =
 
         let triples =
             pythagorean 4 15
-                |> PickAllLogContext().Handler.RunMany
+                |> PickAllLogEnv().Handler.RunMany
                 |> List.map fst
         Assert.AreEqual(
             [

@@ -3,8 +3,8 @@
 open AlgEff.Effect
 
 /// Pure state handler.
-type PureStateHandler<'state, 'ctx, 'ret when 'ctx :> StateContext<'state> and 'ctx :> ContextSatisfier<'ret>>(initial : 'state, context : 'ctx) =
-    inherit SimpleHandler<'ctx, 'ret, 'state>()
+type PureStateHandler<'state, 'env, 'ret when 'env :> StateContext<'state> and 'env :> Environment<'ret>>(initial : 'state, env : 'env) =
+    inherit SimpleHandler<'env, 'ret, 'state>()
 
     /// Start with given initial state.
     override __.Start = initial

@@ -23,8 +23,8 @@ module PureConsole =
         }
 
 /// Pure console handler.
-type PureConsoleHandler<'ctx, 'ret when 'ctx :> ConsoleContext and 'ctx :> ContextSatisfier<'ret>>(input, context : 'ctx) =
-    inherit SimpleHandler<'ctx, 'ret, PureConsole>()
+type PureConsoleHandler<'env, 'ret when 'env :> ConsoleContext and 'env :> Environment<'ret>>(input, env : 'env) =
+    inherit SimpleHandler<'env, 'ret, PureConsole>()
 
     /// Console has pending input, but no output yet.
     override __.Start = PureConsole.create input []
@@ -56,8 +56,8 @@ type PureConsoleHandler<'ctx, 'ret when 'ctx :> ConsoleContext and 'ctx :> Conte
         { state with Output = state.Output |> List.rev }
 
 /// Actual console handler.
-type ActualConsoleHandler<'ctx, 'ret when 'ctx :> ConsoleContext and 'ctx :> ContextSatisfier<'ret>>(context : 'ctx) =
-    inherit SimpleHandler<'ctx, 'ret, Unit>()
+type ActualConsoleHandler<'env, 'ret when 'env :> ConsoleContext and 'env :> Environment<'ret>>(env : 'env) =
+    inherit SimpleHandler<'env, 'ret, Unit>()
 
     /// No internal state to maintain.
     override __.Start = Unit
