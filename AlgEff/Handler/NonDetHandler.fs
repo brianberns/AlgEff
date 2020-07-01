@@ -2,6 +2,7 @@
 
 open AlgEff.Effect
 
+/// Always picks the true choice.
 type PickTrue<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ContextSatisfier<'ret>>(context : 'ctx) =
     inherit SimpleHandler<'ctx, 'ret, Unit>()
 
@@ -18,6 +19,7 @@ type PickTrue<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ContextSatisfier
 
         this.Adapt<_, 'stx> step Unit effect cont
 
+/// Picks the choice with the maximum value.
 type PickMax<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ContextSatisfier<'ret> and 'ret : comparison>(context : 'ctx) =
     inherit SimpleHandler<'ctx, 'ret, Unit>()
 
@@ -30,14 +32,13 @@ type PickMax<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ContextSatisfier<
                 | Decide eff ->
                     let resT, stxT = eff.Cont(true) |> cont Unit |> List.exactlyOne
                     let resF, stxF = eff.Cont(false) |> cont Unit |> List.exactlyOne
-                    if resT > resF then
-                        [ resT, stxT ]
-                    else
-                        [ resF, stxF ]
+                    if resT > resF then [ resT, stxT ]
+                    else [ resF, stxF ]
                 | Fail _ -> []
 
         this.Adapt<_, 'stx> step Unit effect cont
 
+/// Picks all the choices.
 type PickAll<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ContextSatisfier<'ret>>(context : 'ctx) =
     inherit SimpleHandler<'ctx, 'ret, Unit>()
 
