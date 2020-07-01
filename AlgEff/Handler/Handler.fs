@@ -21,14 +21,14 @@ type Handler<'ctx, 'ret, 'st, 'fin>() =
         'st                                        // state before handling current effect
             * Effect<'ctx, 'ret>                   // effect to be handled
             * HandlerCont<'ctx, 'ret, 'st, 'stx>   // continuation that will handle the remainder of the program
-            -> Option<'stx * 'ret>                 // "Some" indicates the effect was handled
+            -> Option<List<'stx * 'ret>>           // "Some" indicates the effect was handled
 
     /// Transforms the handler's final state.
     abstract member Finish : 'st -> 'fin
 
     /// Adapts a step function for use in an effect handler.
     member __.Adapt<'eff, 'stx when 'eff :> Effect<'ctx, 'ret>>
-        (step : 'st -> 'eff -> HandlerCont<'ctx, 'ret, 'st, 'stx> -> ('stx * 'ret)) =
+        (step : 'st -> 'eff -> HandlerCont<'ctx, 'ret, 'st, 'stx> -> List<'stx * 'ret>) =
         fun state (effect : Effect<_>) cont ->
             match effect with
                 | :? 'eff as eff ->
@@ -36,7 +36,7 @@ type Handler<'ctx, 'ret, 'st, 'fin>() =
                 | _ -> None
 
     /// Runs the given program.
-    member this.Run(program) =
+    member this.RunMany(program) =
 
         /// Runs a single step in the program.
         let rec loop state = function
@@ -45,16 +45,20 @@ type Handler<'ctx, 'ret, 'st, 'fin>() =
                     |> Option.defaultWith (fun () ->
                         failwithf "Unhandled effect: %A" effect)
             | Pure ret ->
-                state, ret
+                [ state, ret ]
 
-        let state, result = loop this.Start program
-        result, this.Finish(state)
+        loop this.Start program
+            |> List.map (fun (state, ret) -> ret, this.Finish(state))
+
+    /// Runs the given program.
+    member this.Run(program) =
+        program |> this.RunMany |> List.exactlyOne
 
 /// Continuation that handles the remainder of a program.
 and HandlerCont<'ctx, 'ret, 'st, 'stx> =
     'st                          // state after handling current effect
         -> Program<'ctx, 'ret>   // remainder of the program to handle
-        -> ('stx * 'ret)         // output of handling the program
+        -> List<'stx * 'ret>         // output of handling the program
 
 /// Combines two effect handlers using the given finish.
 type private CombinedHandler<'ctx, 'ret, 'st1, 'fin1, 'st2, 'fin2, 'fin>

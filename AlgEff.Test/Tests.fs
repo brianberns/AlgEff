@@ -47,7 +47,6 @@ type PickMaxConcreteContext<'ret when 'ret : comparison>() as this =
 
     member __.Handler = handler
 
-(*
 type PickAllConcreteContext<'ret when 'ret : comparison>() as this =
     inherit ConcreteContext<'ret>()
     
@@ -56,7 +55,6 @@ type PickAllConcreteContext<'ret when 'ret : comparison>() as this =
     interface NonDetContext
 
     member __.Handler = handler
-*)
 
 [<TestClass>]
 type TestClass () =
@@ -111,16 +109,15 @@ type TestClass () =
                 return x1 - x2
             }
 
-        let resultA, _ =
+        let resultA, Unit =
             program () |> PickTrueConcreteContext().Handler.Run
+
         Assert.AreEqual(10, resultA)
 
-        let resultB, _ =
+        let resultB, Unit =
             program () |> PickMaxConcreteContext().Handler.Run
         Assert.AreEqual(25, resultB)
 
-        (*
-        let resultC, _ =
-            program () |> PickAllConcreteContext().Handler.Run
-        Assert.AreEqual([10; 5; 25; 20], resultC)
-        *)
+        let resultC =
+            program () |> PickAllConcreteContext().Handler.RunMany
+        Assert.AreEqual([10, Unit; 5, Unit; 25, Unit; 20, Unit], resultC)

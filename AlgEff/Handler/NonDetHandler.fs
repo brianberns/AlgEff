@@ -29,35 +29,31 @@ type PickMax<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'
         let step Unit (nonDetEff : NonDetEffect<_>) cont =
             match nonDetEff.Case with
                 | Decide eff ->
-                    let stxT, resT = eff.Cont(true) |> cont Unit
-                    let stxF, resF = eff.Cont(false) |> cont Unit
+                    let stxT, resT = eff.Cont(true) |> cont Unit |> List.exactlyOne
+                    let stxF, resF = eff.Cont(false) |> cont Unit |> List.exactlyOne
                     if resT > resF then
-                        stxT, resT
+                        [ stxT, resT ]
                     else
-                        stxF, resF
+                        [ stxF, resF ]
 
         this.Adapt<_, 'stx> step Unit effect cont
 
     override __.Finish(Unit) = Unit
 
-(*
 type PickAll<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'ret>>(context : 'ctx) =
-    inherit Handler<'ctx, 'ret, List<'ret>, Unit, Unit>()
+    inherit Handler<'ctx, 'ret, Unit, Unit>()
 
     override __.Start = Unit
 
     override this.TryStep<'stx>(_, effect, cont) =
 
-        let step Unit (nonDetEff : NonDetEffect<_>) (cont : HandlerCont<'ctx, 'ret, List<'ret>, Unit, 'stx>) : List<'stx * 'res> =
+        let step Unit (nonDetEff : NonDetEffect<_>) cont =
             match nonDetEff.Case with
                 | Decide eff ->
-                    let pairsT : List<'stx * 'res> = eff.Cont(true) |> cont Unit
-                    let pairsF : List<'stx * 'res> = eff.Cont(false) |> cont Unit
+                    let pairsT = eff.Cont(true) |> cont Unit
+                    let pairsF = eff.Cont(false) |> cont Unit
                     List.append pairsT pairsF
 
         this.Adapt<_, 'stx> step Unit effect cont
 
-    override __.ToResult(ret) = [ ret ]
-
     override __.Finish(Unit) = Unit
-*)
