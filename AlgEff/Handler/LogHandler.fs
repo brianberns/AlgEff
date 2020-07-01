@@ -6,8 +6,10 @@ open AlgEff.Effect
 type PureLogHandler<'ctx, 'ret when 'ctx :> LogContext and 'ctx :> ContextSatisfier<'ret>>(context : 'ctx) =
     inherit SimpleHandler<'ctx, 'ret, List<string>>()
 
+    /// Start with an empty log.
     override __.Start = []
 
+    /// Adds a string to the log.
     override this.TryStep<'stx>(log, effect, cont) =
 
         let step log (logEff : LogEffect<_>) cont =
@@ -17,4 +19,5 @@ type PureLogHandler<'ctx, 'ret when 'ctx :> LogContext and 'ctx :> ContextSatisf
 
         this.Adapt<_, 'stx> step log effect cont
 
+    /// Puts the log in chronological order.
     override __.Finish(log) = List.rev log

@@ -6,8 +6,7 @@ open AlgEff.Effect
 /// 'ctx: Context type requirement satisfied by this handler.
 /// 'ret: Return type of program handled by this handler.
 /// 'st:  Internal state type maintained by this handler.
-/// 'fin: Final state type produced by this handler. (This is
-///       typically, but not necessarily, the same as 'st.)
+/// 'fin: Final state type produced by this handler.
 [<AbstractClass>]
 type Handler<'ctx, 'ret, 'st, 'fin>() =
 
@@ -35,7 +34,7 @@ type Handler<'ctx, 'ret, 'st, 'fin>() =
                     step state eff cont |> Some
                 | _ -> None
 
-    /// Runs the given program.
+    /// Runs the given program, producing a list of results.
     member this.RunMany(program) =
 
         /// Runs a single step in the program.
@@ -48,9 +47,10 @@ type Handler<'ctx, 'ret, 'st, 'fin>() =
                 [ state, ret ]
 
         loop this.Start program
-            |> List.map (fun (state, ret) -> ret, this.Finish(state))
+            |> List.map (fun (state, ret) ->
+                ret, this.Finish(state))
 
-    /// Runs the given program.
+    /// Runs the given program, producing a single result.
     member this.Run(program) =
         program |> this.RunMany |> List.exactlyOne
 
@@ -60,12 +60,12 @@ and HandlerCont<'ctx, 'ret, 'st, 'stx> =
         -> Program<'ctx, 'ret>   // remainder of the program to handle
         -> List<'stx * 'ret>     // output of handling the program
 
-/// Handler whose final state is the same as its internal state.
+/// Handler whose final state type is the same as its internal state type.
 [<AbstractClass>]
 type SimpleHandler<'ctx, 'ret, 'st>() =
     inherit Handler<'ctx, 'ret, 'st, 'st>()
 
-    /// Transforms the handler's final state.
+    /// No-op final transformation.
     default __.Finish(state) = state
 
 /// Combines two effect handlers using the given finish.
@@ -122,7 +122,8 @@ module Handler =
             handler5
             (fun ((s1, s2, s3, s4), s5) -> s1, s2, s3, s4, s5)
 
-/// A concrete context that satisfies an effect's context requirement.
+/// Base type for concrete classes that satisfy an effect type's context
+/// requirement.
 [<AbstractClass>]
 type ContextSatisfier<'ret>() = class end
 

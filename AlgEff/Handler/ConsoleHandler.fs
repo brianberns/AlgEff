@@ -2,14 +2,20 @@
 
 open AlgEff.Effect
 
-type ConsoleState =
+/// Pure functional model of a console.
+type PureConsole =
     {
+        /// Input to be read by the console (as if they were
+        /// typed by the user).
         Input : List<string>
+
+        /// Output written to the console so far.
         Output : List<string>
     }
 
-module ConsoleState =
+module PureConsole =
 
+    /// Creates a console.
     let create input output =
         {
             Input = input
@@ -18,10 +24,12 @@ module ConsoleState =
 
 /// Pure console handler.
 type PureConsoleHandler<'ctx, 'ret when 'ctx :> ConsoleContext and 'ctx :> ContextSatisfier<'ret>>(input, context : 'ctx) =
-    inherit SimpleHandler<'ctx, 'ret, ConsoleState>()
+    inherit SimpleHandler<'ctx, 'ret, PureConsole>()
 
-    override __.Start = ConsoleState.create input []
+    /// Console has pending input, but no output yet.
+    override __.Start = PureConsole.create input []
 
+    /// Writes to or reads from the console.
     override this.TryStep(state, effect, cont) =
 
         let step state (consoleEff : ConsoleEffect<_>) cont =
@@ -36,13 +44,14 @@ type PureConsoleHandler<'ctx, 'ret when 'ctx :> ConsoleContext and 'ctx :> Conte
                         | head :: tail ->
                             let state' =
                                 let output = head :: state.Output
-                                ConsoleState.create tail output
+                                PureConsole.create tail output
                             let next = eff.Cont(head)
                             cont state' next
                         | _ -> failwith "No more input"
 
         this.Adapt<_, 'stx> step state effect cont
 
+    /// Puts console output in chronological order.
     override __.Finish(state) =
         { state with Output = state.Output |> List.rev }
 
@@ -50,8 +59,10 @@ type PureConsoleHandler<'ctx, 'ret when 'ctx :> ConsoleContext and 'ctx :> Conte
 type ActualConsoleHandler<'ctx, 'ret when 'ctx :> ConsoleContext and 'ctx :> ContextSatisfier<'ret>>(context : 'ctx) =
     inherit SimpleHandler<'ctx, 'ret, Unit>()
 
+    /// No internal state to maintain.
     override __.Start = Unit
 
+    /// Writes to or reads from the console.
     override this.TryStep(state, effect, cont) =
 
         let step Unit (consoleEff : ConsoleEffect<_>) cont =
