@@ -10,9 +10,8 @@ type PureStateHandler<'state, 'env, 'ret when 'env :> StateContext<'state> and '
     override __.Start = initial
 
     /// Sets or gets the state.
-    override this.TryStep(state, effect, cont) =
-
-        let step state (stateEff : StateEffect<_, _>) cont =
+    override __.TryStep(state, effect, cont : HandlerCont<_, _, _, 'stx>) =
+        Handler.adapt effect (fun (stateEff : StateEffect<_, _>) ->
             match stateEff.Case with
                 | Put eff ->
                     let state' = eff.Value
@@ -20,6 +19,4 @@ type PureStateHandler<'state, 'env, 'ret when 'env :> StateContext<'state> and '
                     cont state' next
                 | Get eff ->
                     let next = eff.Cont(state)
-                    cont state next
-
-        this.Adapt<_, 'stx> step state effect cont
+                    cont state next)

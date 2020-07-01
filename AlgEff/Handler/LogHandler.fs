@@ -10,14 +10,11 @@ type PureLogHandler<'env, 'ret when 'env :> LogContext and 'env :> Environment<'
     override __.Start = []
 
     /// Adds a string to the log.
-    override this.TryStep<'stx>(log, effect, cont) =
-
-        let step log (logEff : LogEffect<_>) cont =
+    override __.TryStep<'stx>(log, effect, cont : HandlerCont<_, _, _, 'stx>) =
+        Handler.adapt effect (fun (logEff : LogEffect<_>) ->
             let log' = logEff.String :: log
             let next = logEff.Cont()
-            cont log' next
-
-        this.Adapt<_, 'stx> step log effect cont
+            cont log' next)
 
     /// Puts the log in chronological order.
     override __.Finish(log) = List.rev log

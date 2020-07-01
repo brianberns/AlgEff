@@ -25,15 +25,6 @@ type Handler<'ctx, 'ret, 'st, 'fin>() =
     /// Transforms the handler's final state.
     abstract member Finish : 'st -> 'fin
 
-    /// Adapts a step function for use in an effect handler.
-    member __.Adapt<'eff, 'stx when 'eff :> Effect<'ctx, 'ret>>
-        (step : 'st -> 'eff -> HandlerCont<'ctx, 'ret, 'st, 'stx> -> List<'ret * 'stx>) =
-        fun state (effect : Effect<_>) cont ->
-            match effect with
-                | :? 'eff as eff ->
-                    step state eff cont |> Some
-                | _ -> None
-
     /// Runs the given program, producing a list of results.
     member this.RunMany(program) =
 
@@ -92,6 +83,14 @@ type private CombinedHandler<'ctx, 'ret, 'st1, 'fin1, 'st2, 'fin2, 'fin>
         finish (handler1.Finish(state1), handler2.Finish(state2))
 
 module Handler =
+
+    /// Adapts a step function for use in an effect handler.
+    let adapt<'eff, 'next, 'ret when 'eff :> Effect<'next>>
+        (effect : Effect<'next>)
+        (step : 'eff -> 'ret) =
+            match effect with
+                | :? 'eff as eff -> step eff |> Some
+                | _ -> None
 
     /// Combines two handlers using the given finish.
     let private combine handler1 handler2 finish =

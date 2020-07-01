@@ -30,9 +30,8 @@ type PureConsoleHandler<'env, 'ret when 'env :> ConsoleContext and 'env :> Envir
     override __.Start = PureConsole.create input []
 
     /// Writes to or reads from the console.
-    override this.TryStep(state, effect, cont) =
-
-        let step state (consoleEff : ConsoleEffect<_>) cont =
+    override __.TryStep<'stx>(state, effect, cont : HandlerCont<_, _, _, 'stx>) =
+        Handler.adapt effect (fun (consoleEff : ConsoleEffect<_>) ->
             match consoleEff.Case with
                 | WriteLine eff ->
                     let state' =
@@ -47,9 +46,7 @@ type PureConsoleHandler<'env, 'ret when 'env :> ConsoleContext and 'env :> Envir
                                 PureConsole.create tail output
                             let next = eff.Cont(head)
                             cont state' next
-                        | _ -> failwith "No more input"
-
-        this.Adapt<_, 'stx> step state effect cont
+                        | _ -> failwith "No more input")
 
     /// Puts console output in chronological order.
     override __.Finish(state) =
@@ -63,9 +60,8 @@ type ActualConsoleHandler<'env, 'ret when 'env :> ConsoleContext and 'env :> Env
     override __.Start = Unit
 
     /// Writes to or reads from the console.
-    override this.TryStep(state, effect, cont) =
-
-        let step Unit (consoleEff : ConsoleEffect<_>) cont =
+    override __.TryStep<'stx>(Unit, effect, cont : HandlerCont<_, _, _, 'stx>) =
+        Handler.adapt effect (fun (consoleEff : ConsoleEffect<_>) ->
             match consoleEff.Case with
                 | WriteLine eff ->
                     System.Console.WriteLine(eff.String)
@@ -74,6 +70,4 @@ type ActualConsoleHandler<'env, 'ret when 'env :> ConsoleContext and 'env :> Env
                 | ReadLine eff ->
                     let str = System.Console.ReadLine()
                     let next = eff.Cont(str)
-                    cont Unit next
-
-        this.Adapt<_, 'stx> step state effect cont
+                    cont Unit next)
