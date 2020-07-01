@@ -58,7 +58,15 @@ type Handler<'ctx, 'ret, 'st, 'fin>() =
 and HandlerCont<'ctx, 'ret, 'st, 'stx> =
     'st                          // state after handling current effect
         -> Program<'ctx, 'ret>   // remainder of the program to handle
-        -> List<'stx * 'ret>         // output of handling the program
+        -> List<'stx * 'ret>     // output of handling the program
+
+/// Handler whose final state is the same as its internal state.
+[<AbstractClass>]
+type SimpleHandler<'ctx, 'ret, 'st>() =
+    inherit Handler<'ctx, 'ret, 'st, 'st>()
+
+    /// Transforms the handler's final state.
+    default __.Finish(state) = state
 
 /// Combines two effect handlers using the given finish.
 type private CombinedHandler<'ctx, 'ret, 'st1, 'fin1, 'st2, 'fin2, 'fin>
@@ -114,10 +122,9 @@ module Handler =
             handler5
             (fun ((s1, s2, s3, s4), s5) -> s1, s2, s3, s4, s5)
 
-/// A concrete context that satisfies an effect's context
-/// requirement.
+/// A concrete context that satisfies an effect's context requirement.
 [<AbstractClass>]
-type ConcreteContext<'ret>() = class end
+type ContextSatisfier<'ret>() = class end
 
 /// Unit type replacement.
 /// https://stackoverflow.com/questions/47909938/passing-unit-as-type-parameter-to-generic-class-in-f

@@ -2,8 +2,8 @@
 
 open AlgEff.Effect
 
-type PickTrue<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'ret>>(context : 'ctx) =
-    inherit Handler<'ctx, 'ret, Unit, Unit>()
+type PickTrue<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ContextSatisfier<'ret>>(context : 'ctx) =
+    inherit SimpleHandler<'ctx, 'ret, Unit>()
 
     override __.Start = Unit
 
@@ -18,10 +18,8 @@ type PickTrue<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<
 
         this.Adapt<_, 'stx> step Unit effect cont
 
-    override __.Finish(Unit) = Unit
-
-type PickMax<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'ret> and 'ret : comparison>(context : 'ctx) =
-    inherit Handler<'ctx, 'ret, Unit, Unit>()
+type PickMax<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ContextSatisfier<'ret> and 'ret : comparison>(context : 'ctx) =
+    inherit SimpleHandler<'ctx, 'ret, Unit>()
 
     override __.Start = Unit
 
@@ -40,10 +38,8 @@ type PickMax<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'
 
         this.Adapt<_, 'stx> step Unit effect cont
 
-    override __.Finish(Unit) = Unit
-
-type PickAll<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'ret>>(context : 'ctx) =
-    inherit Handler<'ctx, 'ret, Unit, Unit>()
+type PickAll<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ContextSatisfier<'ret>>(context : 'ctx) =
+    inherit SimpleHandler<'ctx, 'ret, Unit>()
 
     override __.Start = Unit
 
@@ -58,5 +54,3 @@ type PickAll<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'
                 | Fail _ -> []
 
         this.Adapt<_, 'stx> step Unit effect cont
-
-    override __.Finish(Unit) = Unit

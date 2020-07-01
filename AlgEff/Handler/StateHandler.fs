@@ -3,8 +3,8 @@
 open AlgEff.Effect
 
 /// Pure state handler.
-type PureStateHandler<'state, 'ctx, 'ret when 'ctx :> StateContext<'state> and 'ctx :> ConcreteContext<'ret>>(initial : 'state, context : 'ctx) =
-    inherit Handler<'ctx, 'ret, 'state, 'state>()
+type PureStateHandler<'state, 'ctx, 'ret when 'ctx :> StateContext<'state> and 'ctx :> ContextSatisfier<'ret>>(initial : 'state, context : 'ctx) =
+    inherit SimpleHandler<'ctx, 'ret, 'state>()
 
     override __.Start = initial
 
@@ -21,5 +21,3 @@ type PureStateHandler<'state, 'ctx, 'ret when 'ctx :> StateContext<'state> and '
                     cont state next
 
         this.Adapt<_, 'stx> step state effect cont
-
-    override __.Finish(state) = state

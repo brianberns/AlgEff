@@ -6,7 +6,7 @@ open AlgEff.Effect
 open AlgEff.Handler
 
 type GreetContext<'ret>(consoleInput) as this =
-    inherit ConcreteContext<'ret>()
+    inherit ContextSatisfier<'ret>()
 
     let handler =
         Handler.combine3
@@ -21,7 +21,7 @@ type GreetContext<'ret>(consoleInput) as this =
     member __.Handler = handler
 
 type PureStateContext<'state, 'ret>(initial : 'state) as this =
-    inherit ConcreteContext<'ret>()
+    inherit ContextSatisfier<'ret>()
 
     let handler = PureStateHandler(initial, this)
     
@@ -30,7 +30,7 @@ type PureStateContext<'state, 'ret>(initial : 'state) as this =
     member __.Handler = handler
 
 type PickTrueConcreteContext<'ret>() as this =
-    inherit ConcreteContext<'ret>()
+    inherit ContextSatisfier<'ret>()
     
     let handler = PickTrue(this)
 
@@ -39,7 +39,7 @@ type PickTrueConcreteContext<'ret>() as this =
     member __.Handler = handler
 
 type PickMaxConcreteContext<'ret when 'ret : comparison>() as this =
-    inherit ConcreteContext<'ret>()
+    inherit ContextSatisfier<'ret>()
     
     let handler = PickMax(this)
 
@@ -48,7 +48,7 @@ type PickMaxConcreteContext<'ret when 'ret : comparison>() as this =
     member __.Handler = handler
 
 type PickAllConcreteContext<'ret when 'ret : comparison>() as this =
-    inherit ConcreteContext<'ret>()
+    inherit ContextSatisfier<'ret>()
     
     let handler = PickAll(this)
 

@@ -4,7 +4,7 @@ open AlgEff.Effect
 open AlgEff.Handler
 
 type ProgramContext<'ret>() as this =
-    inherit ConcreteContext<'ret>()
+    inherit ContextSatisfier<'ret>()
 
     let handler =
         Handler.combine2

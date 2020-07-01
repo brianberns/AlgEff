@@ -17,8 +17,8 @@ module ConsoleState =
         }
 
 /// Pure console handler.
-type PureConsoleHandler<'ctx, 'ret when 'ctx :> ConsoleContext and 'ctx :> ConcreteContext<'ret>>(input, context : 'ctx) =
-    inherit Handler<'ctx, 'ret, ConsoleState, ConsoleState>()
+type PureConsoleHandler<'ctx, 'ret when 'ctx :> ConsoleContext and 'ctx :> ContextSatisfier<'ret>>(input, context : 'ctx) =
+    inherit SimpleHandler<'ctx, 'ret, ConsoleState>()
 
     override __.Start = ConsoleState.create input []
 
@@ -47,8 +47,8 @@ type PureConsoleHandler<'ctx, 'ret when 'ctx :> ConsoleContext and 'ctx :> Concr
         { state with Output = state.Output |> List.rev }
 
 /// Actual console handler.
-type ActualConsoleHandler<'ctx, 'ret when 'ctx :> ConsoleContext and 'ctx :> ConcreteContext<'ret>>(context : 'ctx) =
-    inherit Handler<'ctx, 'ret, Unit, Unit>()
+type ActualConsoleHandler<'ctx, 'ret when 'ctx :> ConsoleContext and 'ctx :> ContextSatisfier<'ret>>(context : 'ctx) =
+    inherit SimpleHandler<'ctx, 'ret, Unit>()
 
     override __.Start = Unit
 
@@ -66,5 +66,3 @@ type ActualConsoleHandler<'ctx, 'ret when 'ctx :> ConsoleContext and 'ctx :> Con
                     cont Unit next
 
         this.Adapt<_, 'stx> step state effect cont
-
-    override __.Finish(Unit) = Unit
