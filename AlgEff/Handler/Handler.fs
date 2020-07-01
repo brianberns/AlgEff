@@ -20,14 +20,14 @@ type Handler<'ctx, 'ret, 'st, 'fin>() =
         'st                                        // state before handling current effect
             * Effect<'ctx, 'ret>                   // effect to be handled
             * HandlerCont<'ctx, 'ret, 'st, 'stx>   // continuation that will handle the remainder of the program
-            -> Option<List<'stx * 'ret>>           // "Some" indicates the effect was handled
+            -> Option<List<'ret * 'stx>>           // "Some" indicates the effect was handled
 
     /// Transforms the handler's final state.
     abstract member Finish : 'st -> 'fin
 
     /// Adapts a step function for use in an effect handler.
     member __.Adapt<'eff, 'stx when 'eff :> Effect<'ctx, 'ret>>
-        (step : 'st -> 'eff -> HandlerCont<'ctx, 'ret, 'st, 'stx> -> List<'stx * 'ret>) =
+        (step : 'st -> 'eff -> HandlerCont<'ctx, 'ret, 'st, 'stx> -> List<'ret * 'stx>) =
         fun state (effect : Effect<_>) cont ->
             match effect with
                 | :? 'eff as eff ->
@@ -44,10 +44,10 @@ type Handler<'ctx, 'ret, 'st, 'fin>() =
                     |> Option.defaultWith (fun () ->
                         failwithf "Unhandled effect: %A" effect)
             | Pure ret ->
-                [ state, ret ]
+                [ ret, state ]
 
         loop this.Start program
-            |> List.map (fun (state, ret) ->
+            |> List.map (fun (ret, state) ->
                 ret, this.Finish(state))
 
     /// Runs the given program, producing a single result.
@@ -58,7 +58,7 @@ type Handler<'ctx, 'ret, 'st, 'fin>() =
 and HandlerCont<'ctx, 'ret, 'st, 'stx> =
     'st                          // state after handling current effect
         -> Program<'ctx, 'ret>   // remainder of the program to handle
-        -> List<'stx * 'ret>     // output of handling the program
+        -> List<'ret * 'stx>     // output of handling the program
 
 /// Handler whose final state type is the same as its internal state type.
 [<AbstractClass>]

@@ -28,12 +28,12 @@ type PickMax<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ContextSatisfier<
         let step Unit (nonDetEff : NonDetEffect<_>) cont =
             match nonDetEff.Case with
                 | Decide eff ->
-                    let stxT, resT = eff.Cont(true) |> cont Unit |> List.exactlyOne
-                    let stxF, resF = eff.Cont(false) |> cont Unit |> List.exactlyOne
+                    let resT, stxT = eff.Cont(true) |> cont Unit |> List.exactlyOne
+                    let resF, stxF = eff.Cont(false) |> cont Unit |> List.exactlyOne
                     if resT > resF then
-                        [ stxT, resT ]
+                        [ resT, stxT ]
                     else
-                        [ stxF, resF ]
+                        [ resF, stxF ]
                 | Fail _ -> []
 
         this.Adapt<_, 'stx> step Unit effect cont
