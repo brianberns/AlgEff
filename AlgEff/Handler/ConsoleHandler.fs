@@ -18,7 +18,7 @@ module ConsoleState =
 
 /// Pure console handler.
 type PureConsoleHandler<'ctx, 'ret when 'ctx :> ConsoleContext and 'ctx :> ConcreteContext<'ret>>(input, context : 'ctx) =
-    inherit SimpleHandler<'ctx, 'ret, ConsoleState, ConsoleState>()
+    inherit Handler<'ctx, 'ret, ConsoleState, ConsoleState>()
 
     override __.Start = ConsoleState.create input []
 
@@ -48,7 +48,7 @@ type PureConsoleHandler<'ctx, 'ret when 'ctx :> ConsoleContext and 'ctx :> Concr
 
 /// Actual console handler.
 type ActualConsoleHandler<'ctx, 'ret when 'ctx :> ConsoleContext and 'ctx :> ConcreteContext<'ret>>(context : 'ctx) =
-    inherit SimpleHandler<'ctx, 'ret, Unit, Unit>()
+    inherit Handler<'ctx, 'ret, Unit, Unit>()
 
     override __.Start = Unit
 

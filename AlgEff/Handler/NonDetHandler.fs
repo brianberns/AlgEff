@@ -3,7 +3,7 @@
 open AlgEff.Effect
 
 type PickTrue<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'ret>>(context : 'ctx) =
-    inherit SimpleHandler<'ctx, 'ret, Unit, Unit>()
+    inherit Handler<'ctx, 'ret, Unit, Unit>()
 
     override __.Start = Unit
 
@@ -20,7 +20,7 @@ type PickTrue<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<
     override __.Finish(Unit) = Unit
 
 type PickMax<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'ret> and 'ret : comparison>(context : 'ctx) =
-    inherit SimpleHandler<'ctx, 'ret, Unit, Unit>()
+    inherit Handler<'ctx, 'ret, Unit, Unit>()
 
     override __.Start = Unit
 
@@ -40,6 +40,7 @@ type PickMax<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'
 
     override __.Finish(Unit) = Unit
 
+(*
 type PickAll<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'ret>>(context : 'ctx) =
     inherit Handler<'ctx, 'ret, List<'ret>, Unit, Unit>()
 
@@ -47,15 +48,16 @@ type PickAll<'ctx, 'ret when 'ctx :> NonDetContext and 'ctx :> ConcreteContext<'
 
     override this.TryStep<'stx>(_, effect, cont) =
 
-        let step Unit (nonDetEff : NonDetEffect<_>) (cont : HandlerCont<'ctx, 'ret, List<'ret>, Unit, 'stx>) : ('stx * List<'ret>) =
+        let step Unit (nonDetEff : NonDetEffect<_>) (cont : HandlerCont<'ctx, 'ret, List<'ret>, Unit, 'stx>) : List<'stx * 'res> =
             match nonDetEff.Case with
                 | Decide eff ->
-                    let stxT, resT = eff.Cont(true) |> cont Unit
-                    let stxF, resF = eff.Cont(false) |> cont Unit
-                    stxT, List.append resT resF
+                    let pairsT : List<'stx * 'res> = eff.Cont(true) |> cont Unit
+                    let pairsF : List<'stx * 'res> = eff.Cont(false) |> cont Unit
+                    List.append pairsT pairsF
 
         this.Adapt<_, 'stx> step Unit effect cont
 
     override __.ToResult(ret) = [ ret ]
 
     override __.Finish(Unit) = Unit
+*)
