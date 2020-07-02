@@ -62,7 +62,7 @@ And the corresponding log would contain a single entry:
 Name is Kristin
 ```
 ## Defining an effect
-One of the simplest effects is for writing strings to a log. This effect is defined as follows:
+To define your own effect, simply inherit a new type from the base `Effect` type:
 ```fsharp
 /// Logs the given string.
 type LogEffect<'next>(str : string, cont : unit -> 'next) =
@@ -80,6 +80,6 @@ type LogEffect<'next>(str : string, cont : unit -> 'next) =
 ```
 There are several important things to notice 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMjMxODEwODI1LC02MTM2ODMzMDQsMTY3OT
-I5ODU5MCwzNTYzMzg0MzksLTE2MjEzOTcxMzhdfQ==
+eyJoaXN0b3J5IjpbLTEwNjkyOTY4MDQsLTYxMzY4MzMwNCwxNj
+c5Mjk4NTkwLDM1NjMzODQzOSwtMTYyMTM5NzEzOF19
 -->
