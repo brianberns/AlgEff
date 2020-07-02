@@ -9,8 +9,10 @@
     <FileVersion>1.0.0.0</FileVersion>
     <Version>1.0.0</Version>
     <Copyright>Brian Berns</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <RepositoryUrl>https://github.com/brianberns/AlgEff</RepositoryUrl>
     <PackageProjectUrl>https://github.com/brianberns/AlgEff</PackageProjectUrl>
+    <PackageIconUrl>https://avatars2.githubusercontent.com/u/11883138</PackageIconUrl>
     <PackageIcon></PackageIcon>
   </PropertyGroup>
 
@@ -27,6 +29,13 @@
     <Compile Include="Handler\StateHandler.fs" />
     <Compile Include="Handler\NonDetHandler.fs" />
     <Compile Include="Handler\ConcurrencyHandler.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
