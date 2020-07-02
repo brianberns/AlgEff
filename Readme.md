@@ -11,7 +11,7 @@ AlgEff is one of the few algebraic effect systems for F#. It was inspired by a s
 * Handlers are easy to define.
 * Programs that use effects and handlers are easy to write.
 * Strong typing reduces the possibility of unhandled effects.
-## A simple example
+## Writing an effectful program
 Let's write a simple effectful program that interacts with the user via a console and then logs the result:
 ```fsharp
 let program =
@@ -28,7 +28,7 @@ The type of this value is:
 Program<'ctx, string when 'ctx :> LogContext and 'ctx :> ConsoleContext>
 ```
 The first type parameter (`'ctx`) indicates that the program requires handlers for both logging and console effects, and the second one (`string`) indicates that the program returns a string. It's important to understand that this program doesn't actually **do** anything until it's executed. The `program` value itself is purely functional -- no side-effects occurred in the process of creating it.
-
+## Creating a runtime environment
 In order to run this program (and potentially cause actual side-effects), we must define an environment that satisfies the program's requirements:
 ```fsharp
 type ProgramEnv<'ret>() as this =
@@ -44,7 +44,9 @@ type ProgramEnv<'ret>() as this =
 
     member __.Handler = handler
 ```
-The important thing to note here is that our environment contains both a log handler (`PureLogHandler`) and a console handler (`ActualConsoleHandler`). In this case, we've decided to use a log handler that is purely functional (it doesn't perform any I/O) and a console handler that invokes a real command-line console.
+The important thing to note here is that our environment contains both a log handler (`PureLogHandler`) and a console handler (`ActualConsoleHandler`). In this case, we've decided to use a log handler that is purely functional (it doesn't perform any I/O) and a console handler that invokes a real command-line console. We could easily have made other choices.
+## Running an effectful program
+Now that we have both a program and an environment that satisfies its requirement
 
 ## Defining an effect
 One of the simplest effects is for writing strings to a log. This effect is defined as follows:
@@ -65,6 +67,6 @@ type LogEffect<'next>(str : string, cont : unit -> 'next) =
 ```
 There are several important things to notice 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMjA4MTc1ODg0MCwxNjc5Mjk4NTkwLDM1Nj
+eyJoaXN0b3J5IjpbLTcxODcxNTg2MSwxNjc5Mjk4NTkwLDM1Nj
 MzODQzOSwtMTYyMTM5NzEzOF19
 -->
