@@ -23,6 +23,10 @@ let program =
         return name
     }
 ```
+The type of this value is:
+```fsharp
+Program<'a
+```
 
 ## Defining an effect
 One of the simplest effects is for writing strings to a log. This effect is defined as follows:
@@ -43,6 +47,6 @@ type LogEffect<'next>(str : string, cont : unit -> 'next) =
 ```
 There are several important things to notice 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMzAxODM3Njc2LDE2NzkyOTg1OTAsMzU2Mz
-M4NDM5LC0xNjIxMzk3MTM4XX0=
+eyJoaXN0b3J5IjpbLTE0MTM5MzA1NTMsMTY3OTI5ODU5MCwzNT
+YzMzg0MzksLTE2MjEzOTcxMzhdfQ==
 -->
