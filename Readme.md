@@ -46,7 +46,15 @@ type ProgramEnv<'ret>() as this =
 ```
 The important thing to note here is that our environment contains both a log handler (`PureLogHandler`) and a console handler (`ActualConsoleHandler`). In this case, we've decided to use a log handler that is purely functional (it doesn't perform any I/O) and a console handler that invokes a real command-line console. We could easily have made other choices.
 ## Running an effectful program
-Now that we have both a program and an environment that satisfies its requirement
+Now that we have both a program and an environment that satisfies its requirements, we can actually run it:
+```fsharp
+let name, (log, Unit) =
+    ProgramEnv().Handler.Run(program)
+printfn "Log: %A" log
+printfn "Name: %s" name
+```
+Running a program returns a 2-tuple where the first element is the value returned by the program (`name`) and the second element is the final state of the environment's handlers. Because there are two handlers, the final state is itself a 2-tuple containing the log (console state (`Unit` here because we used an actual console with side-effects rather than simulating I/O in memory) and the 
+The resulting console looks like this:
 
 ## Defining an effect
 One of the simplest effects is for writing strings to a log. This effect is defined as follows:
@@ -67,6 +75,6 @@ type LogEffect<'next>(str : string, cont : unit -> 'next) =
 ```
 There are several important things to notice 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTcxODcxNTg2MSwxNjc5Mjk4NTkwLDM1Nj
+eyJoaXN0b3J5IjpbMTU5MzUxMjU5NSwxNjc5Mjk4NTkwLDM1Nj
 MzODQzOSwtMTYyMTM5NzEzOF19
 -->
