@@ -12,8 +12,24 @@ AlgEff is one of the few algebraic effect systems for F#. It was inspired by a s
 * Effects have no dependencies on their handlers.
 * Strong typing helps eliminate the possibility of unhandled effects.
 ## Defining an effect
-One of the simplest effects is for wrilogging strings:
+One of the simplest effects is for writing strings to a log. This effect is defined as follows:
+```fsharp
+/// Logs the given string.
+type LogEffect<'next>(str : string, cont : unit -> 'next) =
+    inherit Effect<'next>()
+
+    /// Maps a function over this effect.
+    override __.Map(f) =
+        LogEffect(str, cont >> f) :> _
+
+    /// String to log.
+    member __.String = str
+
+    /// Continuation to next effect.
+    member __.Cont = cont
+```
+There are several important things to notice 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTgxNTQyNTEwOSwzNTYzMzg0MzksLTE2Mj
+eyJoaXN0b3J5IjpbMTY3OTI5ODU5MCwzNTYzMzg0MzksLTE2Mj
 EzOTcxMzhdfQ==
 -->
