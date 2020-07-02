@@ -6,7 +6,8 @@ Algebraic effects provide a way to define and handle side-effects in  functional
 
 In summary, you can think of algebraic effects as functional programming's answer to dependency injection in object-oriented programming. They solve a similar problem, but in a more functional way.
 ## Why use AlgEff?
-AlgEff is one of the few algebraic effect systems for F#. It was inspired by a similar project called [Eff]([https://github.com/palladin/Eff](https://github.com/palladin/Eff)) and by Scala's ZIO.
+AlgEff is one of the few algebraic effect systems for F#. It was inspired by a similar project called [Eff](https://github.com/palladin/Eff) and by [Scala's ZIO](https://zio.dev/). Reasons to choose AlgEff include:
+*
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTI5MTMyMzU3MywtMTYyMTM5NzEzOF19
+eyJoaXN0b3J5IjpbMzkxMTI2OTc3LC0xNjIxMzk3MTM4XX0=
 -->
