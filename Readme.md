@@ -9,8 +9,10 @@ In summary, you can think of algebraic effects as functional programming's answe
 AlgEff is one of the few algebraic effect systems for F#. It was inspired by a similar F# library called [Eff](https://github.com/palladin/Eff) and by [Scala's ZIO](https://zio.dev/). Reasons to use AlgEff:
 * Effects are easy to define.
 * Handlers are easy to define.
-* Effects have no dependencies on their handlers.
-* Strong typing helps eliminate the possibility of unhandled effects.
+* Programs that use effects and handlers are easy to write.
+* Strong typing reduces the possibility of unhandled effects.
+## A simple example
+
 ## Defining an effect
 One of the simplest effects is for writing strings to a log. This effect is defined as follows:
 ```fsharp
@@ -30,6 +32,6 @@ type LogEffect<'next>(str : string, cont : unit -> 'next) =
 ```
 There are several important things to notice 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTY3OTI5ODU5MCwzNTYzMzg0MzksLTE2Mj
-EzOTcxMzhdfQ==
+eyJoaXN0b3J5IjpbLTE1NjE0MDY4MjMsMTY3OTI5ODU5MCwzNT
+YzMzg0MzksLTE2MjEzOTcxMzhdfQ==
 -->
