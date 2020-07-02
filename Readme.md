@@ -44,7 +44,7 @@ type ProgramEnv<'ret>() as this =
 
     member __.Handler = handler
 ```
-The important thing to note here is that our environment contains both a log handler (``)
+The important thing to note here is that our environment contains both a log handler (`PureLogHandler`) and a console handler (`ActualConsoleHandler`). In this case, we've decided to use a log handler that is purely functional (it doesn't perform any I/O) and a console handler that invokes a real command-line console.
 
 ## Defining an effect
 One of the simplest effects is for writing strings to a log. This effect is defined as follows:
@@ -65,6 +65,6 @@ type LogEffect<'next>(str : string, cont : unit -> 'next) =
 ```
 There are several important things to notice 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMzExMjAwMzQ3LDE2NzkyOTg1OTAsMzU2Mz
-M4NDM5LC0xNjIxMzk3MTM4XX0=
+eyJoaXN0b3J5IjpbMjA4MTc1ODg0MCwxNjc5Mjk4NTkwLDM1Nj
+MzODQzOSwtMTYyMTM5NzEzOF19
 -->
