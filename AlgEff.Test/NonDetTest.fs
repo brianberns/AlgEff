@@ -5,38 +5,13 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open AlgEff.Effect
 open AlgEff.Handler
 
-type PickTrueLogEnv<'ret>() as this =
+type NonDetLogEnv<'ret when 'ret : comparison>
+    (createNonDetHandler : _ -> NonDetHandler<NonDetLogEnv<'ret>, 'ret>) as this =
     inherit Environment<'ret>()
     
     let handler =
         Handler.combine2
-            (PickTrue(this))
-            (PureLogHandler(this))
-
-    interface NonDetContext
-    interface LogContext
-
-    member __.Handler = handler
-
-type PickMaxLogEnv<'ret when 'ret : comparison>() as this =
-    inherit Environment<'ret>()
-    
-    let handler =
-        Handler.combine2
-            (PickMax(this))
-            (PureLogHandler(this))
-
-    interface NonDetContext
-    interface LogContext
-
-    member __.Handler = handler
-
-type PickAllLogEnv<'ret>() as this =
-    inherit Environment<'ret>()
-    
-    let handler =
-        Handler.combine2
-            (PickAll(this))
+            (createNonDetHandler(this))
             (PureLogHandler(this))
 
     interface NonDetContext
@@ -61,18 +36,18 @@ type NonDetTest() =
             }
 
         let resultA, (Unit, logA) =
-            program () |> PickTrueLogEnv().Handler.Run
+            program () |> NonDetLogEnv(NonDetHandler.pickTrue).Handler.Run
         Assert.AreEqual(10, resultA)
         Assert.AreEqual(["x1: 15"; "x2: 5"; "x1 - x2: 10"], logA)
 
         let resultB, (Unit, logB) =
-            program () |> PickMaxLogEnv().Handler.Run
+            program () |> NonDetLogEnv(NonDetHandler.pickMax).Handler.Run
         Assert.AreEqual(25, resultB)
         Assert.AreEqual(["x1: 30"; "x2: 5"; "x1 - x2: 25"], logB)
 
         let resultC =
             program ()
-                |> PickAllLogEnv().Handler.RunMany
+                |> NonDetLogEnv(NonDetHandler.pickAll).Handler.RunMany
                 |> List.map fst
         Assert.AreEqual([10; 5; 25; 20], resultC)
 
@@ -110,7 +85,7 @@ type NonDetTest() =
 
         let triples =
             pythagorean 4 15
-                |> PickAllLogEnv().Handler.RunMany
+                |> NonDetLogEnv(NonDetHandler.pickAll).Handler.RunMany
                 |> List.map fst
         Assert.AreEqual(
             [

@@ -2,13 +2,17 @@
 
 open AlgEff.Effect
 
+[<AbstractClass>]
+type NonDetHandler<'env, 'ret>() =
+    inherit SimpleHandler<'env, 'ret, Unit>()
+
 /// Always picks the true choice.
 type PickTrue<'env, 'ret when 'env :> NonDetContext and 'env :> Environment<'ret>>(env : 'env) =
-    inherit SimpleHandler<'env, 'ret, Unit>()
+    inherit NonDetHandler<'env, 'ret>()
 
     override __.Start = Unit
 
-    override this.TryStep<'stx>(Unit, effect, cont : HandlerCont<_, _, _, 'stx>) =
+    override __.TryStep<'stx>(Unit, effect, cont : HandlerCont<_, _, _, 'stx>) =
         Handler.adapt effect (fun (nonDetEff : NonDetEffect<_>) ->
             match nonDetEff.Case with
                 | Decide eff ->
@@ -18,7 +22,7 @@ type PickTrue<'env, 'ret when 'env :> NonDetContext and 'env :> Environment<'ret
 
 /// Picks the choice with the maximum value.
 type PickMax<'env, 'ret when 'env :> NonDetContext and 'env :> Environment<'ret> and 'ret : comparison>(env : 'env) =
-    inherit SimpleHandler<'env, 'ret, Unit>()
+    inherit NonDetHandler<'env, 'ret>()
 
     override __.Start = Unit
 
@@ -34,7 +38,7 @@ type PickMax<'env, 'ret when 'env :> NonDetContext and 'env :> Environment<'ret>
 
 /// Picks all the choices.
 type PickAll<'env, 'ret when 'env :> NonDetContext and 'env :> Environment<'ret>>(env : 'env) =
-    inherit SimpleHandler<'env, 'ret, Unit>()
+    inherit NonDetHandler<'env, 'ret>()
 
     override __.Start = Unit
 
@@ -46,3 +50,14 @@ type PickAll<'env, 'ret when 'env :> NonDetContext and 'env :> Environment<'ret>
                     let pairsF = eff.Cont(false) |> cont Unit
                     List.append pairsT pairsF
                 | Fail _ -> [])
+
+module NonDetHandler =
+
+    /// Always picks the true choice.
+    let pickTrue env = PickTrue(env) :> NonDetHandler<_, _>
+
+    /// Picks the choice with the maximum value.
+    let pickMax env = PickMax(env) :> NonDetHandler<_, _>
+
+    /// Picks all the choices.
+    let pickAll env = PickAll(env) :> NonDetHandler<_, _>
