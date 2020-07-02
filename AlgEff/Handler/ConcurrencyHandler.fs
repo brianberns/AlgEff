@@ -28,17 +28,26 @@ module Queue =
 type PureConcurrencyHandler<'env when 'env :> ConcurrencyContext and 'env :> Environment<unit>>(env : 'env) =
     inherit SimpleHandler<'env, unit, Queue<unit -> Program<'env, unit>>>()
 
-    /// 
+    /// Starts with an empty queue of programs.
     override __.Start = Queue.empty
 
-    /// 
+    /// Manages program control.
     override __.TryStep<'stx>(queue, effect, cont : HandlerCont<_, _, _, 'stx>) =
+
+        /// Runs the next queued program.
+        let run queue =
+            let getProgram, queue' = queue |> Queue.dequeue
+            cont queue' <| getProgram ()
+
         Handler.adapt effect (fun (concurrencyEff : ConcurrencyEffect<'env, _>) ->
             match concurrencyEff.Case with
                 | Fork eff ->
                     let queue' = queue |> Queue.enqueue eff.Cont
                     cont queue' eff.Program
                 | Yield eff ->
-                    let queue' = queue |> Queue.enqueue eff.Cont
-                    let getProgram, queue'' = queue' |> Queue.dequeue
-                    cont queue'' <| getProgram ())
+                    queue |> Queue.enqueue eff.Cont |> run
+                | Exit eff ->
+                    if queue |> Queue.isEmpty then
+                        cont queue <| eff.Cont ()
+                    else
+                        run queue)
