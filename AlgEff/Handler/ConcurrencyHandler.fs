@@ -3,22 +3,26 @@
 open AlgEff.Effect
 
 /// https://stackoverflow.com/questions/33464319/implement-a-queue-type-in-f
-type Queue<'a> =
-    | Queue of 'a list * 'a list
+type Queue<'a> = 'a list * 'a list
 
 module Queue =
 
-    let empty = Queue ([], [])
+    let empty =
+        [], []
 
-    let enqueue e = function
-        | Queue (fs, bs) -> Queue (e :: fs, bs)
+    let isEmpty = function
+        | ([], []) -> true
+        | _ -> false
+
+    let enqueue e (fs, bs) =
+        e :: fs, bs
 
     let dequeue = function
-        | Queue ([], []) -> failwith "Empty queue"
-        | Queue (fs, b :: bs) -> b, Queue (fs, bs)
-        | Queue (fs, []) -> 
+        | ([], []) -> failwith "Empty queue"
+        | (fs, b :: bs) -> b, (fs, bs)
+        | (fs, []) ->
             let bs = List.rev fs
-            bs.Head, Queue ([], bs.Tail)
+            bs.Head, ([], bs.Tail)
 
 /// Pure concurrency handler.
 type PureConcurrencyHandler<'env when 'env :> ConcurrencyContext and 'env :> Environment<unit>>(env : 'env) =

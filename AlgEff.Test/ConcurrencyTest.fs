@@ -26,21 +26,29 @@ type ConcurrencyTest() =
 
         let rec program id depth =
             effect {
-                do! Log.writef "Starting number %d!" id
-                if depth > 0 then 
-                    do! Log.writef "Forking number %d!" (id * 2 + 1)
-                    do! Concurrency.fork <| program (id * 2 + 1) (depth - 1)
-                    do! Log.writef "Forking number %d!" (id * 2 + 2)
-                    do! Concurrency.fork <| program (id * 2 + 2) (depth - 1)
-                else 
-                    do! Log.writef "Yielding in number %d!" id
-                    // do! Concurrency.yld
-                    let moo = Concurrency.yld
-                    do! Log.writef "Resumed number %d!" id
-                do! Log.writef "Finishing number %d!" id
+                do! Log.writef "Starting %d" id
+                if depth > 0 then
+                    let depth' = depth - 1
+
+                        // fork left child
+                    let idLeft = id * 2 + 1
+                    do! Log.writef "Forking %d" idLeft
+                    do! Concurrency.fork <| program idLeft depth'
+
+                        // fork right child
+                    let idRight = id * 2 + 2
+                    do! Log.writef "Forking %d" idRight
+                    do! Concurrency.fork <| program idRight depth'
+
+                else
+                    do! Log.writef "Yielding in %d" id
+                    do! Concurrency.yld
+                    do! Log.writef "Resumed %d" id
+                do! Log.writef "Finishing %d" id
             }
 
         let (), (queue, log) =
             PureConcurrencyLogEnv().Handler.Run(program 0 2)
-        printfn "%A" queue
-        printfn "%A" log
+        // Assert.IsTrue(Queue.isEmpty queue)
+        for str in log do
+            printfn "%A" str

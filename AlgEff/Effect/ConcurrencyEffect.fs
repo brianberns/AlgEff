@@ -32,7 +32,7 @@ and YieldEffect<'ctx, 'next>(cont : unit -> 'next) =
 
     /// Maps a function over this effect.
     override __.Map(f) =
-        YieldEffect(cont >> f) :> _
+        YieldEffect<'ctx, _>(cont >> f) :> _
 
     /// Type-safe subtype enumeration.
     override this.Case = Yield this
