@@ -51,13 +51,16 @@ Now that we have both a program and an environment that satisfies its requiremen
 let name, (log, Unit) =
     ProgramEnv().Handler.Run(program)
 ```
-Running a program returns a 2-tuple where the first element is the value returned by the program (`name`) and the second element is the final state of the environment's handlers. Because there are two handlers, the final state is itself a 2-tuple containing the log (`log`) and the console state (`Unit` here because we used an actual console with side-effects rather than simulating I/O in memory).
+Running a program returns a 2-tuple where the first element is the value returned by the program (`name`) and the second element is the final state of the environment's handlers. Because there are two handlers, the final state is itself a 2-tuple containing the log (`log`) and the console state (`Unit` here because we used an actual console with side-effects rather than simulating I/O in memory). The resulting console might look like this:
 ```
-[netcoreapp3.1] dotnet .\AlgEff.Test.dll
 What is your name?
 Kristin
-Hello Kristin```
-
+Hello Kristin
+```
+And the corresponding log would contain a single entry:
+```
+Name is Kristin
+```
 ## Defining an effect
 One of the simplest effects is for writing strings to a log. This effect is defined as follows:
 ```fsharp
@@ -77,6 +80,6 @@ type LogEffect<'next>(str : string, cont : unit -> 'next) =
 ```
 There are several important things to notice 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTMwNjUzODQ3MywtNjEzNjgzMzA0LDE2Nz
-kyOTg1OTAsMzU2MzM4NDM5LC0xNjIxMzk3MTM4XX0=
+eyJoaXN0b3J5IjpbMjMxODEwODI1LC02MTM2ODMzMDQsMTY3OT
+I5ODU5MCwzNTYzMzg0MzksLTE2MjEzOTcxMzhdfQ==
 -->
