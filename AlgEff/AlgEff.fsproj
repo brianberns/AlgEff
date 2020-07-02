@@ -15,7 +15,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="nuget.config" />
     <Compile Include="Effect\Effect.fs" />
     <Compile Include="Effect\LogEffect.fs" />
     <Compile Include="Effect\ConsoleEffect.fs" />
@@ -29,8 +28,6 @@
     <Compile Include="Handler\NonDetHandler.fs" />
     <Compile Include="Handler\ConcurrencyHandler.fs" />
   </ItemGroup>
-
-  <ItemGroup />
 
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.7.2" />
