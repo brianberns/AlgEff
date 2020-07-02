@@ -12,8 +12,7 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <RepositoryUrl>https://github.com/brianberns/AlgEff</RepositoryUrl>
     <PackageProjectUrl>https://github.com/brianberns/AlgEff</PackageProjectUrl>
-    <PackageIconUrl>https://avatars2.githubusercontent.com/u/11883138</PackageIconUrl>
-    <PackageIcon></PackageIcon>
+    <PackageIcon>Icon.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,6 +31,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\Icon.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
     <None Include="..\LICENSE">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
