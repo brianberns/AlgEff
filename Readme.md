@@ -79,7 +79,7 @@ type LogEffect<'next>(str : string, cont : unit -> 'next) =
     member __.Cont = cont
 ```
 ## Handling an effect
-Handling an effect type is also easy. The following handles log effects by accumulating strings in a list:
+Handling effects  is also easy. The following handles log effects by accumulating strings in a list:
 ```fsharp
 type PureLogHandler<'env, 'ret when 'env :> LogContext and 'env :> Environment<'ret>>(env : 'env) =
     inherit SimpleHandler<'env, 'ret, List<string>>()
@@ -98,6 +98,7 @@ type PureLogHandler<'env, 'ret when 'env :> LogContext and 'env :> Environment<'
     override __.Finish(log) = List.rev log
 ```
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTYwMzgxMTUwNSwtNjEzNjgzMzA0LDE2Nz
-kyOTg1OTAsMzU2MzM4NDM5LC0xNjIxMzk3MTM4XX0=
+eyJoaXN0b3J5IjpbLTIwMDE0MDM4MTUsMTYwMzgxMTUwNSwtNj
+EzNjgzMzA0LDE2NzkyOTg1OTAsMzU2MzM4NDM5LC0xNjIxMzk3
+MTM4XX0=
 -->
