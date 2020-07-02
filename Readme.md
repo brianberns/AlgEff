@@ -50,11 +50,8 @@ Now that we have both a program and an environment that satisfies its requiremen
 ```fsharp
 let name, (log, Unit) =
     ProgramEnv().Handler.Run(program)
-printfn "Log: %A" log
-printfn "Name: %s" name
 ```
-Running a program returns a 2-tuple where the first element is the value returned by the program (`name`) and the second element is the final state of the environment's handlers. Because there are two handlers, the final state is itself a 2-tuple containing the log (console state (`Unit` here because we used an actual console with side-effects rather than simulating I/O in memory) and the 
-The resulting console looks like this:
+Running a program returns a 2-tuple where the first element is the value returned by the program (`name`) and the second element is the final state of the environment's handlers. Because there are two handlers, the final state is itself a 2-tuple containing the log (`log`) and the console state (`Unit` here because we used an actual console with side-effects rather than simulating I/O in memory).
 
 ## Defining an effect
 One of the simplest effects is for writing strings to a log. This effect is defined as follows:
@@ -75,6 +72,6 @@ type LogEffect<'next>(str : string, cont : unit -> 'next) =
 ```
 There are several important things to notice 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTU5MzUxMjU5NSwxNjc5Mjk4NTkwLDM1Nj
+eyJoaXN0b3J5IjpbLTYxMzY4MzMwNCwxNjc5Mjk4NTkwLDM1Nj
 MzODQzOSwtMTYyMTM5NzEzOF19
 -->
