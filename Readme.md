@@ -78,8 +78,26 @@ type LogEffect<'next>(str : string, cont : unit -> 'next) =
     /// Continuation to next effect.
     member __.Cont = cont
 ```
-There are several important things to notice 
+## Handling an effect
+Handling an effect type is also easy. The following handles log effects by accumulating strings in a list:
+```fsharp
+type PureLogHandler<'env, 'ret when 'env :> LogContext and 'env :> Environment<'ret>>(env : 'env) =
+    inherit SimpleHandler<'env, 'ret, List<string>>()
+
+    /// Start with an empty log.
+    override __.Start = []
+
+    /// Adds a string to the log.
+    override __.TryStep<'stx>(log, effect, cont : HandlerCont<_, _, _, 'stx>) =
+        Handler.adapt effect (fun (logEff : LogEffect<_>) ->
+            let log' = logEff.String :: log
+            let next = logEff.Cont()
+            cont log' next)
+
+    /// Puts the log in chronological order.
+    override __.Finish(log) = List.rev log
+```
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEwNjkyOTY4MDQsLTYxMzY4MzMwNCwxNj
-c5Mjk4NTkwLDM1NjMzODQzOSwtMTYyMTM5NzEzOF19
+eyJoaXN0b3J5IjpbMTY0MzcwMzc5MiwtNjEzNjgzMzA0LDE2Nz
+kyOTg1OTAsMzU2MzM4NDM5LC0xNjIxMzk3MTM4XX0=
 -->
