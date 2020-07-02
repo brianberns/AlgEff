@@ -5,6 +5,11 @@
 
     <IsPackable>false</IsPackable>
     <GenerateProgramFile>false</GenerateProgramFile>
+    <RepositoryUrl>https://github.com/brianberns/AlgEff</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/brianberns/AlgEff</PackageProjectUrl>
+    <PackageIcon></PackageIcon>
+    <Authors>Brian Berns</Authors>
+    <Company>Bernsrite Industries</Company>
   </PropertyGroup>
 
   <ItemGroup>
