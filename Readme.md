@@ -27,7 +27,7 @@ The type of this value is:
 ```fsharp
 Program<'ctx, string when 'ctx :> LogContext and 'ctx :> ConsoleContext>
 ```
-The first type parameter (`'ctx`) indicates that the program requires handlers for both logging and console effects, and the second one (`string`) indicates that the program returns a string. It's important to understand that this program doesn't actually **do** anything until it's executed. The `program` value itself is purely functional -- no side-effects occurred in the process of creating it.
+The first type parameter (`'ctx`) indicates that the program requires handlers for both logging and console effects, and the second one (`string`) indicates that the program returns a string. It's important to understand that this program doesn't actually **do** anything until it's executed. The `program` value itself is purely functional -- no side-effects occurred while creating it.
 ## Creating a runtime environment
 In order to run this program (and potentially cause actual side-effects), we must define an environment that satisfies the program's requirements:
 ```fsharp
@@ -98,6 +98,6 @@ type PureLogHandler<'env, 'ret when 'env :> LogContext and 'env :> Environment<'
     override __.Finish(log) = List.rev log
 ```
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTY0MzcwMzc5MiwtNjEzNjgzMzA0LDE2Nz
+eyJoaXN0b3J5IjpbMTYwMzgxMTUwNSwtNjEzNjgzMzA0LDE2Nz
 kyOTg1OTAsMzU2MzM4NDM5LC0xNjIxMzk3MTM4XX0=
 -->
