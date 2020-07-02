@@ -36,6 +36,9 @@ type ProgramBuilder() =
     member __.Return(value) = Pure value
     member __.ReturnFrom(value) = value
     member __.Zero() = Pure ()
+    member this.Combine(program1, program2) =
+        this.Bind(program1, fun () -> program2)
+    member __.Delay(f) = f ()
 
 [<AutoOpen>]
 module ProgramBuilder =

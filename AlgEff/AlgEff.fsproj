@@ -17,11 +17,13 @@
     <Compile Include="Effect\ConsoleEffect.fs" />
     <Compile Include="Effect\StateEffect.fs" />
     <Compile Include="Effect\NonDetEffect.fs" />
+    <Compile Include="Effect\Concurrency.fs" />
     <Compile Include="Handler\Handler.fs" />
     <Compile Include="Handler\LogHandler.fs" />
     <Compile Include="Handler\ConsoleHandler.fs" />
     <Compile Include="Handler\StateHandler.fs" />
     <Compile Include="Handler\NonDetHandler.fs" />
+    <Compile Include="Handler\Concurrency.fs" />
   </ItemGroup>
 
   <ItemGroup>
