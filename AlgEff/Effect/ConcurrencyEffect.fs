@@ -46,7 +46,7 @@ and ConcurrencyEffectSum<'ctx, 'next> =
     | Yield of YieldEffect<'ctx, 'next>
 
 /// Concurrency context requirement.
-and ConcurrencyContext = interface end
+type ConcurrencyContext = interface end
 
 module Concurrency =
 
@@ -56,4 +56,4 @@ module Concurrency =
 
     /// 
     let yld<'ctx when 'ctx :> ConcurrencyContext> : Program<'ctx, _> =
-        Free (YieldEffect(Pure))
+        Free (YieldEffect<'ctx, _>(Pure))

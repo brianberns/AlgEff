@@ -34,7 +34,8 @@ type ConcurrencyTest() =
                     do! Concurrency.fork <| program (id * 2 + 2) (depth - 1)
                 else 
                     do! Log.writef "Yielding in number %d!" id
-                    do! Concurrency.yld
+                    // do! Concurrency.yld
+                    let moo = Concurrency.yld
                     do! Log.writef "Resumed number %d!" id
                 do! Log.writef "Finishing number %d!" id
             }
