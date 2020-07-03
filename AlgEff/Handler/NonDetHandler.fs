@@ -13,7 +13,7 @@ type PickTrue<'env, 'ret when 'env :> NonDetContext and 'env :> Environment<'ret
     override __.Start = Unit
 
     override __.TryStep<'stx>(Unit, effect, cont : HandlerCont<_, _, _, 'stx>) =
-        Handler.adapt effect (fun (nonDetEff : NonDetEffect<_>) ->
+        Handler.tryStep effect (fun (nonDetEff : NonDetEffect<_>) ->
             match nonDetEff.Case with
                 | Decide eff ->
                     let next = eff.Cont(true)
@@ -27,7 +27,7 @@ type PickMax<'env, 'ret when 'env :> NonDetContext and 'env :> Environment<'ret>
     override __.Start = Unit
 
     override __.TryStep(Unit, effect, cont : HandlerCont<_, _, _, 'stx>) =
-        Handler.adapt effect (fun (nonDetEff : NonDetEffect<_>) ->
+        Handler.tryStep effect (fun (nonDetEff : NonDetEffect<_>) ->
             match nonDetEff.Case with
                 | Decide eff ->
                     let resT, stxT = eff.Cont(true) |> cont Unit |> List.exactlyOne
@@ -43,7 +43,7 @@ type PickAll<'env, 'ret when 'env :> NonDetContext and 'env :> Environment<'ret>
     override __.Start = Unit
 
     override __.TryStep<'stx>(Unit, effect, cont : HandlerCont<_, _, _, 'stx>) =
-        Handler.adapt effect (fun (nonDetEff : NonDetEffect<_>) ->
+        Handler.tryStep effect (fun (nonDetEff : NonDetEffect<_>) ->
             match nonDetEff.Case with
                 | Decide eff ->
                     let pairsT = eff.Cont(true) |> cont Unit

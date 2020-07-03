@@ -85,7 +85,7 @@ type private CombinedHandler<'ctx, 'ret, 'st1, 'fin1, 'st2, 'fin2, 'fin>
 module Handler =
 
     /// Adapts a step function for use in an effect handler.
-    let adapt<'eff, 'next, 'ret when 'eff :> Effect<'next>>
+    let tryStep<'eff, 'next, 'ret when 'eff :> Effect<'next>>
         (effect : Effect<'next>)
         (step : 'eff -> 'ret) =
             match effect with

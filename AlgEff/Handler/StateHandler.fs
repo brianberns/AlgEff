@@ -11,7 +11,7 @@ type PureStateHandler<'state, 'env, 'ret when 'env :> StateContext<'state> and '
 
     /// Sets or gets the state.
     override __.TryStep(state, effect, cont : HandlerCont<_, _, _, 'stx>) =
-        Handler.adapt effect (fun (stateEff : StateEffect<_, _>) ->
+        Handler.tryStep effect (fun (stateEff : StateEffect<_, _>) ->
             match stateEff.Case with
                 | Put eff ->
                     let state' = eff.Value

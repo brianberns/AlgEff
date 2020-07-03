@@ -31,7 +31,7 @@ type PureConsoleHandler<'env, 'ret when 'env :> ConsoleContext and 'env :> Envir
 
     /// Writes to or reads from the console.
     override __.TryStep<'stx>(state, effect, cont : HandlerCont<_, _, _, 'stx>) =
-        Handler.adapt effect (fun (consoleEff : ConsoleEffect<_>) ->
+        Handler.tryStep effect (fun (consoleEff : ConsoleEffect<_>) ->
             match consoleEff.Case with
                 | WriteLine eff ->
                     let state' =
@@ -61,7 +61,7 @@ type ActualConsoleHandler<'env, 'ret when 'env :> ConsoleContext and 'env :> Env
 
     /// Writes to or reads from the console.
     override __.TryStep<'stx>(Unit, effect, cont : HandlerCont<_, _, _, 'stx>) =
-        Handler.adapt effect (fun (consoleEff : ConsoleEffect<_>) ->
+        Handler.tryStep effect (fun (consoleEff : ConsoleEffect<_>) ->
             match consoleEff.Case with
                 | WriteLine eff ->
                     System.Console.WriteLine(eff.String)

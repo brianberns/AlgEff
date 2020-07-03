@@ -89,7 +89,7 @@ type PureLogHandler<'env, 'ret when 'env :> LogContext and 'env :> Environment<'
 
     /// Adds a string to the log.
     override __.TryStep<'stx>(log, effect, cont : HandlerCont<_, _, _, 'stx>) =
-        Handler.adapt effect (fun (logEff : LogEffect<_>) ->
+        Handler.tryStep effect (fun (logEff : LogEffect<_>) ->
             let log' = logEff.String :: log
             let next = logEff.Cont()
             cont log' next)

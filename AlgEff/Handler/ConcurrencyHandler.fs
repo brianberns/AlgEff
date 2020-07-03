@@ -39,7 +39,7 @@ type PureConcurrencyHandler<'env when 'env :> ConcurrencyContext and 'env :> Env
             let getProgram, queue' = queue |> Queue.dequeue
             cont queue' <| getProgram ()
 
-        Handler.adapt effect (fun (concurrencyEff : ConcurrencyEffect<'env, _>) ->
+        Handler.tryStep effect (fun (concurrencyEff : ConcurrencyEffect<'env, _>) ->
             match concurrencyEff.Case with
                 | Fork eff ->
                     let queue' = queue |> Queue.enqueue eff.Cont
