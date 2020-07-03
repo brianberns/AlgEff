@@ -9,6 +9,7 @@ type NonDetEffect<'next>() =
     /// Type-safe subtype enumeration.
     abstract member Case : NonDetEffectSum<'next>
 
+/// Generates a non-deterministic boolean.
 and DecideEffect<'next>(cont : bool -> 'next) =
     inherit NonDetEffect<'next>()
 
@@ -22,6 +23,7 @@ and DecideEffect<'next>(cont : bool -> 'next) =
     /// Continuation to next effect.
     member __.Cont = cont
 
+/// Triggers backtracking.
 and FailEffect<'next>(cont : unit -> 'next) =
     inherit NonDetEffect<'next>()
 
@@ -45,15 +47,18 @@ type NonDetContext = interface end
 
 module NonDet =
 
+    /// Generates a non-deterministic boolean.
     let decide<'ctx when 'ctx :> NonDetContext> : Program<'ctx, _> =
         Free (DecideEffect(Pure))
 
-    let fail<'ctx when 'ctx :> NonDetContext> : Program<'ctx, _> =
-        Free (FailEffect(Pure))
-
+    /// Chooses between two values non-deterministically.
     let choose x y =
         effect {
             let! flag = decide
             return
                 if flag then x else y
         }
+
+    /// Triggers backtracking.
+    let fail<'ctx when 'ctx :> NonDetContext> : Program<'ctx, _> =
+        Free (FailEffect(Pure))
