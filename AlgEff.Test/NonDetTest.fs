@@ -22,6 +22,17 @@ type NonDetLogEnv<'ret when 'ret : comparison>
 [<TestClass>]
 type NonDetTest() =
 
+    let rec chooseInt m n =
+        effect {
+            if m > n then
+                do! NonDet.fail
+                return -1
+            else
+                let! flag = NonDet.decide
+                if flag then return m
+                else return! chooseInt (m + 1) n
+        }
+
     [<TestMethod>]
     member __.NonDet() =
 
@@ -54,17 +65,6 @@ type NonDetTest() =
     [<TestMethod>]
     member __.Pythagorean() =
 
-        let rec chooseInt m n =
-            effect {
-                if m > n then
-                    do! NonDet.fail
-                    return -1
-                else
-                    let! flag = NonDet.decide
-                    if flag then return m
-                    else return! chooseInt (m + 1) n
-            }
-
         let perfectSqrt x =
             let root = float x |> sqrt |> int
             if root * root = x then
@@ -96,3 +96,37 @@ type NonDetTest() =
             ],
             triples
         )
+
+    [<TestMethod>]
+    member __.NQueens() =
+
+        let size = 4
+
+        let isSafe (rowA, colA) (rowB, colB) =
+            rowA <> rowB
+                && colA <> colB
+                && abs (rowA - rowB) <> abs (colA - colB)
+
+        let allSafe positions position =
+            positions
+                |> Seq.forall (isSafe position)
+
+        let rec fill positions =
+            effect {
+                let col = positions |> List.length
+                if col = size then
+                    return positions
+                else
+                    let! row = chooseInt 0 (size - 1)
+                    let position = row, col
+                    if allSafe positions position then
+                        return! fill (position :: positions)
+                    else
+                        do! NonDet.fail
+                        return []
+            }
+
+        let positions =
+            fill []
+                |> NonDetLogEnv(NonDetHandler.pickAll).Handler.RunMany
+        printfn "%A" positions
