@@ -113,11 +113,11 @@ type NonDetTest() =
 
         let rec fill positions =
             effect {
-                let col = positions |> List.length
-                if col = size then
+                let col = (positions |> List.length) + 1
+                if col > size then
                     return positions
                 else
-                    let! row = chooseInt 0 (size - 1)
+                    let! row = chooseInt 1 size
                     let position = row, col
                     if allSafe positions position then
                         return! fill (position :: positions)
@@ -129,4 +129,9 @@ type NonDetTest() =
         let positions =
             fill []
                 |> NonDetLogEnv(NonDetHandler.pickAll).Handler.RunMany
-        printfn "%A" positions
+                |> List.map (fun (positions, _) -> List.rev positions)
+        Assert.AreEqual(
+            [
+                [(2, 1); (4, 2); (1, 3); (3, 4)]
+                [(3, 1); (1, 2); (4, 3); (2, 4)]
+            ], positions)
