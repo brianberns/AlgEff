@@ -98,7 +98,7 @@ type PureLogHandler<'env, 'ret when 'env :> LogContext and 'env :> Environment<'
     override __.Finish(log) = List.rev log
 ```
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTIwMDE0MDM4MTUsMTYwMzgxMTUwNSwtNj
-EzNjgzMzA0LDE2NzkyOTg1OTAsMzU2MzM4NDM5LC0xNjIxMzk3
-MTM4XX0=
+eyJoaXN0b3J5IjpbMjAyOTI1ODEwMCwtMjAwMTQwMzgxNSwxNj
+AzODExNTA1LC02MTM2ODMzMDQsMTY3OTI5ODU5MCwzNTYzMzg0
+MzksLTE2MjEzOTcxMzhdfQ==
 -->
