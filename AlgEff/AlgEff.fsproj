@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <Authors>Brian Berns</Authors>
     <Company>Bernsrite Industries</Company>
     <Description>Algebraic effects for F#</Description>
