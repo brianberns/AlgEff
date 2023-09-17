@@ -5,14 +5,14 @@ type LogEffect<'next>(str : string, cont : unit -> 'next) =
     inherit Effect<'next>()
 
     /// Maps a function over this effect.
-    override __.Map(f) =
+    override _.Map(f) =
         LogEffect(str, cont >> f) :> _
 
     /// String to log.
-    member __.String = str
+    member _.String = str
 
     /// Continuation to next effect.
-    member __.Cont = cont
+    member _.Cont = cont
 
 /// Log context requirement.
 type LogContext = interface end

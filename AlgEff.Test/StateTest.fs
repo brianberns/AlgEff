@@ -12,13 +12,13 @@ type PureStateEnv<'state, 'ret>(initial : 'state) as this =
     
     interface StateContext<'state>
 
-    member __.Handler = handler
+    member _.Handler = handler
 
 [<TestClass>]
 type StateTest() =
 
     [<TestMethod>]
-    member __.State() =
+    member _.State() =
 
         let program =
             effect {

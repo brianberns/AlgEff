@@ -16,13 +16,13 @@ type PureConcurrencyLogEnv() as this =
     interface ConcurrencyContext
     interface LogContext
 
-    member __.Handler = handler
+    member _.Handler = handler
 
 [<TestClass>]
 type ConcurrencyTest() =
 
     [<TestMethod>]
-    member __.Concurrency() =
+    member _.Concurrency() =
 
         let rec program id depth =
             effect {

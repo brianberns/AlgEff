@@ -17,7 +17,7 @@ type NonDetLogEnv<'ret when 'ret : comparison>
     interface NonDetContext
     interface LogContext
 
-    member __.Handler = handler
+    member _.Handler = handler
 
 [<TestClass>]
 type NonDetTest() =
@@ -34,7 +34,7 @@ type NonDetTest() =
         }
 
     [<TestMethod>]
-    member __.NonDet() =
+    member _.NonDet() =
 
         let program () =
             effect {
@@ -63,7 +63,7 @@ type NonDetTest() =
         Assert.AreEqual([10; 5; 25; 20], resultC)
 
     [<TestMethod>]
-    member __.Pythagorean() =
+    member _.Pythagorean() =
 
         let perfectSqrt x =
             let root = float x |> sqrt |> int
@@ -98,7 +98,7 @@ type NonDetTest() =
         )
 
     [<TestMethod>]
-    member __.NQueens() =
+    member _.NQueens() =
 
         let size = 4
 

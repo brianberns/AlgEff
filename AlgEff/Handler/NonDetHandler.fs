@@ -10,9 +10,9 @@ type NonDetHandler<'env, 'ret>() =
 type PickTrue<'env, 'ret when 'env :> NonDetContext and 'env :> Environment<'ret>>(env : 'env) =
     inherit NonDetHandler<'env, 'ret>()
 
-    override __.Start = Unit
+    override _.Start = Unit
 
-    override __.TryStep<'stx>(Unit, effect, cont : HandlerCont<_, _, _, 'stx>) =
+    override _.TryStep<'stx>(Unit, effect, cont : HandlerCont<_, _, _, 'stx>) =
         Handler.tryStep effect (fun (nonDetEff : NonDetEffect<_>) ->
             match nonDetEff.Case with
                 | Decide eff ->
@@ -24,9 +24,9 @@ type PickTrue<'env, 'ret when 'env :> NonDetContext and 'env :> Environment<'ret
 type PickMax<'env, 'ret when 'env :> NonDetContext and 'env :> Environment<'ret> and 'ret : comparison>(env : 'env) =
     inherit NonDetHandler<'env, 'ret>()
 
-    override __.Start = Unit
+    override _.Start = Unit
 
-    override __.TryStep(Unit, effect, cont : HandlerCont<_, _, _, 'stx>) =
+    override _.TryStep(Unit, effect, cont : HandlerCont<_, _, _, 'stx>) =
         Handler.tryStep effect (fun (nonDetEff : NonDetEffect<_>) ->
             match nonDetEff.Case with
                 | Decide eff ->
@@ -40,9 +40,9 @@ type PickMax<'env, 'ret when 'env :> NonDetContext and 'env :> Environment<'ret>
 type PickAll<'env, 'ret when 'env :> NonDetContext and 'env :> Environment<'ret>>(env : 'env) =
     inherit NonDetHandler<'env, 'ret>()
 
-    override __.Start = Unit
+    override _.Start = Unit
 
-    override __.TryStep<'stx>(Unit, effect, cont : HandlerCont<_, _, _, 'stx>) =
+    override _.TryStep<'stx>(Unit, effect, cont : HandlerCont<_, _, _, 'stx>) =
         Handler.tryStep effect (fun (nonDetEff : NonDetEffect<_>) ->
             match nonDetEff.Case with
                 | Decide eff ->

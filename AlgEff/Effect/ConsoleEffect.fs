@@ -13,31 +13,31 @@ and WriteLineEffect<'next>(str : string, cont : unit -> 'next) =
     inherit ConsoleEffect<'next>()
 
     /// Maps a function over this effect.
-    override __.Map(f) =
+    override _.Map(f) =
         WriteLineEffect(str, cont >> f) :> _
 
     /// Type-safe subtype enumeration.
     override this.Case = WriteLine this
 
     /// String to write.
-    member __.String = str
+    member _.String = str
 
     /// Continuation to next effect.
-    member __.Cont = cont
+    member _.Cont = cont
 
 /// Reads a line from the console.
 and ReadLineEffect<'next>(cont : string -> 'next) =
     inherit ConsoleEffect<'next>()
 
     /// Maps a function over this effect.
-    override __.Map(f) =
+    override _.Map(f) =
         ReadLineEffect(cont >> f) :> _
 
     /// Type-safe subtype enumeration.
     override this.Case = ReadLine this
 
     /// Continuation to next effect.
-    member __.Cont = cont
+    member _.Cont = cont
 
 /// Sum type for console effects.
 and ConsoleEffectSum<'next> =

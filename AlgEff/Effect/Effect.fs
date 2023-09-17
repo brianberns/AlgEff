@@ -33,13 +33,13 @@ module Program =
 /// Program builder.
 type ProgramBuilder() =
     let (>>=) program f = Program.bind f program
-    member __.Bind(program, f) = program >>= f
-    member __.Return(value) = Pure value
-    member __.ReturnFrom(value) = value
-    member __.Zero() = Pure ()
-    member __.Combine(program1, program2) =
+    member _.Bind(program, f) = program >>= f
+    member _.Return(value) = Pure value
+    member _.ReturnFrom(value) = value
+    member _.Zero() = Pure ()
+    member _.Combine(program1, program2) =
         program1 >>= (fun () -> program2)
-    member __.Delay(f) = f ()
+    member _.Delay(f) = f ()
 
 [<AutoOpen>]
 module ProgramBuilder =

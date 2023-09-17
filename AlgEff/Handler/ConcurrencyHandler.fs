@@ -29,10 +29,10 @@ type PureConcurrencyHandler<'env when 'env :> ConcurrencyContext and 'env :> Env
     inherit SimpleHandler<'env, unit, Queue<unit -> Program<'env, unit>>>()
 
     /// Starts with an empty queue of programs.
-    override __.Start = Queue.empty
+    override _.Start = Queue.empty
 
     /// Manages program control.
-    override __.TryStep<'stx>(queue, effect, cont : HandlerCont<_, _, _, 'stx>) =
+    override _.TryStep<'stx>(queue, effect, cont : HandlerCont<_, _, _, 'stx>) =
 
         /// Runs the next queued program.
         let run queue =

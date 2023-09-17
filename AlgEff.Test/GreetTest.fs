@@ -19,13 +19,13 @@ type GreetEnv<'ret>(consoleInput) as this =
     interface LogContext
     interface StateContext<string>
 
-    member __.Handler = handler
+    member _.Handler = handler
 
 [<TestClass>]
 type GreetTest() =
 
     [<TestMethod>]
-    member __.Greet() =
+    member _.Greet() =
 
             // require console, log, and state handlers
         let program =

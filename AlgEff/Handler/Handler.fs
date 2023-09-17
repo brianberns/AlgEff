@@ -57,7 +57,7 @@ type SimpleHandler<'ctx, 'ret, 'st>() =
     inherit Handler<'ctx, 'ret, 'st, 'st>()
 
     /// No-op final transformation.
-    default __.Finish(state) = state
+    default _.Finish(state) = state
 
 /// Combines two effect handlers using the given finish.
 type private CombinedHandler<'ctx, 'ret, 'st1, 'fin1, 'st2, 'fin2, 'fin>
@@ -67,11 +67,11 @@ type private CombinedHandler<'ctx, 'ret, 'st1, 'fin1, 'st2, 'fin2, 'fin>
     inherit Handler<'ctx, 'ret, 'st1 * 'st2, 'fin>()
 
     /// Combined initial state.
-    override __.Start = handler1.Start, handler2.Start
+    override _.Start = handler1.Start, handler2.Start
 
     /// Attempts to handle a single effect by routing it first to one handler,
     /// and then to the other.
-    override __.TryStep<'stx>((state1, state2), effect, cont : HandlerCont<_, _, _, 'stx>) =
+    override _.TryStep<'stx>((state1, state2), effect, cont : HandlerCont<_, _, _, 'stx>) =
         handler1.TryStep(state1, effect, fun state1' program ->
             cont (state1', state2) program)
             |> Option.orElseWith (fun () ->
@@ -79,7 +79,7 @@ type private CombinedHandler<'ctx, 'ret, 'st1, 'fin1, 'st2, 'fin2, 'fin>
                     cont (state1, state2') program))
 
     /// Combines the given handlers' final states.
-    override __.Finish((state1, state2)) =
+    override _.Finish((state1, state2)) =
         finish (handler1.Finish(state1), handler2.Finish(state2))
 
 module Handler =

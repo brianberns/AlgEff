@@ -14,28 +14,28 @@ and DecideEffect<'next>(cont : bool -> 'next) =
     inherit NonDetEffect<'next>()
 
     /// Maps a function over this effect.
-    override __.Map(f) =
+    override _.Map(f) =
         DecideEffect(cont >> f) :> _
 
     /// Type-safe subtype enumeration.
     override this.Case = Decide this
 
     /// Continuation to next effect.
-    member __.Cont = cont
+    member _.Cont = cont
 
 /// Triggers backtracking.
 and FailEffect<'next>(cont : unit -> 'next) =
     inherit NonDetEffect<'next>()
 
     /// Maps a function over this effect.
-    override __.Map(f) =
+    override _.Map(f) =
         FailEffect(cont >> f) :> _
 
     /// Type-safe subtype enumeration.
     override this.Case = Fail this
 
     /// Continuation to next effect.
-    member __.Cont = cont
+    member _.Cont = cont
 
 /// Sum type for non-deterministic effects.
 and NonDetEffectSum<'next> =

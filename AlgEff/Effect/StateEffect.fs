@@ -13,31 +13,31 @@ and PutEffect<'state, 'next>(value : 'state, cont : unit -> 'next) =
     inherit StateEffect<'state, 'next>()
 
     /// Maps a function over this effect.
-    override __.Map(f) =
+    override _.Map(f) =
         PutEffect(value, cont >> f) :> _
 
     /// Type-safe subtype enumeration.
     override this.Case = Put this
 
     /// Value to set.
-    member __.Value = value
+    member _.Value = value
 
     /// Continuation to next effect.
-    member __.Cont = cont
+    member _.Cont = cont
 
 /// Gets the current state.
 and GetEffect<'state, 'next>(cont : 'state -> 'next) =
     inherit StateEffect<'state, 'next>()
 
     /// Maps a function over this effect.
-    override __.Map(f) =
+    override _.Map(f) =
         GetEffect(cont >> f) :> _
 
     /// Type-safe subtype enumeration.
     override this.Case = Get this
 
     /// Continuation to next effect.
-    member __.Cont = cont
+    member _.Cont = cont
 
 /// Sum type for state effects.
 and StateEffectSum<'state, 'next> =

@@ -27,10 +27,10 @@ type PureConsoleHandler<'env, 'ret when 'env :> ConsoleContext and 'env :> Envir
     inherit SimpleHandler<'env, 'ret, PureConsole>()
 
     /// Console has pending input, but no output yet.
-    override __.Start = PureConsole.create input []
+    override _.Start = PureConsole.create input []
 
     /// Writes to or reads from the console.
-    override __.TryStep<'stx>(state, effect, cont : HandlerCont<_, _, _, 'stx>) =
+    override _.TryStep<'stx>(state, effect, cont : HandlerCont<_, _, _, 'stx>) =
         Handler.tryStep effect (fun (consoleEff : ConsoleEffect<_>) ->
             match consoleEff.Case with
                 | WriteLine eff ->
@@ -49,7 +49,7 @@ type PureConsoleHandler<'env, 'ret when 'env :> ConsoleContext and 'env :> Envir
                         | _ -> failwith "No more input")
 
     /// Puts console output in chronological order.
-    override __.Finish(state) =
+    override _.Finish(state) =
         { state with Output = state.Output |> List.rev }
 
 /// Actual console handler.
@@ -57,10 +57,10 @@ type ActualConsoleHandler<'env, 'ret when 'env :> ConsoleContext and 'env :> Env
     inherit SimpleHandler<'env, 'ret, Unit>()
 
     /// No internal state to maintain.
-    override __.Start = Unit
+    override _.Start = Unit
 
     /// Writes to or reads from the console.
-    override __.TryStep<'stx>(Unit, effect, cont : HandlerCont<_, _, _, 'stx>) =
+    override _.TryStep<'stx>(Unit, effect, cont : HandlerCont<_, _, _, 'stx>) =
         Handler.tryStep effect (fun (consoleEff : ConsoleEffect<_>) ->
             match consoleEff.Case with
                 | WriteLine eff ->

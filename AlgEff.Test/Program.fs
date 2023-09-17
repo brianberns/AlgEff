@@ -14,7 +14,7 @@ type ProgramEnv<'ret>() as this =
     interface ConsoleContext
     interface LogContext
 
-    member __.Handler = handler
+    member _.Handler = handler
 
 module Program =
 
