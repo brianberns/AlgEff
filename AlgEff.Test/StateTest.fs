@@ -32,5 +32,5 @@ type StateTest() =
 
         let result, state =
             PureStateEnv(1).Handler.Run(program)
-        Assert.AreEqual("4", result)
-        Assert.AreEqual(4, state)
+        Assert.AreEqual<string>("4", result)
+        Assert.AreEqual<int>(4, state)

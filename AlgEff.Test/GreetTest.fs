@@ -41,8 +41,8 @@ type GreetTest() =
 
         let result, (console, log, state) =
             GreetEnv(["John"]).Handler.Run(program)
-        Assert.AreEqual(4, result)
+        Assert.AreEqual<int>(4, result)
         Assert.AreEqual(List.empty<string>, console.Input)
         Assert.AreEqual(["What is your name?"; "John"; "Hello John"], console.Output)
         Assert.AreEqual(["Name is John"], log)
-        Assert.AreEqual("John", state)
+        Assert.AreEqual<string>("John", state)

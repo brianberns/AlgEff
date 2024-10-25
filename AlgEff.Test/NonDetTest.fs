@@ -48,12 +48,12 @@ type NonDetTest() =
 
         let resultA, (Unit, logA) =
             program () |> NonDetLogEnv(NonDetHandler.pickTrue).Handler.Run
-        Assert.AreEqual(10, resultA)
+        Assert.AreEqual<int>(10, resultA)
         Assert.AreEqual(["x1: 15"; "x2: 5"; "x1 - x2: 10"], logA)
 
         let resultB, (Unit, logB) =
             program () |> NonDetLogEnv(NonDetHandler.pickMax).Handler.Run
-        Assert.AreEqual(25, resultB)
+        Assert.AreEqual<int>(25, resultB)
         Assert.AreEqual(["x1: 30"; "x2: 5"; "x1 - x2: 25"], logB)
 
         let resultC =
