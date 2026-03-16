@@ -31,6 +31,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="*.fsproj; **\*.fs; **\*.fsi"  Exclude="bin\**\*; obj\**\*"  PackagePath="fable\" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\Icon.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
